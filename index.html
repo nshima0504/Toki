@@ -240,6 +240,9 @@
     top: 24px;
     right: 24px;
     z-index: 5;
+    transform: translateZ(0);
+    -webkit-transform: translate3d(0, 0, 0);
+    will-change: transform;
   }
   .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
   .theme-toggle.is-light .icon-sun { display: block; }
