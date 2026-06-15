@@ -76,6 +76,37 @@
     --button-primary-bg: rgba(0,0,0,0.1);
   }
 
+  /* ---- 卡片/視窗顏色（低飽和色系） ---- */
+  /* 深色模式下的色調（預設） */
+  [data-color="red"]    { --card-tint: rgba(200,108,108,0.28); --card-tint-border: rgba(224,140,140,0.32); }
+  [data-color="blue"]   { --card-tint: rgba(100,138,172,0.28); --card-tint-border: rgba(136,172,202,0.32); }
+  [data-color="orange"] { --card-tint: rgba(206,140,88,0.28);  --card-tint-border: rgba(226,168,118,0.32); }
+  [data-color="yellow"] { --card-tint: rgba(206,182,96,0.28);  --card-tint-border: rgba(226,204,134,0.32); }
+
+  /* 淺色模式下的色調（透過 prefers-color-scheme 或 data-theme="light" 套用） */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) [data-color="red"]    { --card-tint: rgba(214,128,128,0.5); --card-tint-border: rgba(190,104,104,0.32); }
+    :root:not([data-theme="dark"]) [data-color="blue"]   { --card-tint: rgba(140,166,196,0.5); --card-tint-border: rgba(112,142,176,0.32); }
+    :root:not([data-theme="dark"]) [data-color="orange"] { --card-tint: rgba(224,172,116,0.5); --card-tint-border: rgba(200,142,90,0.32); }
+    :root:not([data-theme="dark"]) [data-color="yellow"] { --card-tint: rgba(224,200,118,0.5); --card-tint-border: rgba(202,176,90,0.32); }
+  }
+
+  :root[data-theme="light"] [data-color="red"]    { --card-tint: rgba(214,128,128,0.5); --card-tint-border: rgba(190,104,104,0.32); }
+  :root[data-theme="light"] [data-color="blue"]   { --card-tint: rgba(140,166,196,0.5); --card-tint-border: rgba(112,142,176,0.32); }
+  :root[data-theme="light"] [data-color="orange"] { --card-tint: rgba(224,172,116,0.5); --card-tint-border: rgba(200,142,90,0.32); }
+  :root[data-theme="light"] [data-color="yellow"] { --card-tint: rgba(224,200,118,0.5); --card-tint-border: rgba(202,176,90,0.32); }
+
+  /* 將色調疊加在原本的玻璃底色上，維持高光與透明度 */
+  .card[data-color]:not([data-color="default"]) {
+    background: linear-gradient(var(--card-tint), var(--card-tint)), var(--card-bg);
+    border-color: var(--card-tint-border);
+  }
+  .modal[data-color]:not([data-color="default"]) {
+    background: linear-gradient(var(--card-tint), var(--card-tint)), var(--modal-bg);
+    border-color: var(--card-tint-border);
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
   html {
     height: 100%;
     background: var(--bg-color);
@@ -205,6 +236,8 @@
     .small-time .ms { font-size: 15px; min-width: 32px; }
     .small-time .sep { font-size: 16px; }
     .status-label { font-size: 12px; margin-top: 18px; }
+    .modal { padding: 28px 20px; }
+    .modal input { font-size: 15px; padding: 14px 12px; }
   }
 
   .add-card {
@@ -285,6 +318,8 @@
   .overlay.hide { display: none; }
 
   .modal {
+    position: relative;
+    transform: translateZ(0);
     width: calc(100% - 80px);
     max-width: 440px;
     background: var(--modal-bg);
@@ -309,9 +344,19 @@
     font-size: 17px;
     outline: none;
     margin-top: 8px;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
   }
   .modal-row { display: flex; gap: 12px; }
   .modal-row > div { flex: 1; }
+  .field-error {
+    font-size: 12px;
+    color: #d98a8a;
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+  .field-error.hide { display: none; }
   .modal-buttons { display: flex; gap: 12px; margin-top: 8px; }
   .modal-buttons button {
     flex: 1;
@@ -328,6 +373,34 @@
     font-weight: 500;
   }
   .modal-buttons button.hide { display: none; }
+
+  /* 顏色選擇器 */
+  .color-picker {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    background: var(--swatch-bg, var(--control-bg));
+    box-shadow: inset 0 0 0 1px var(--control-border);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .color-swatch:hover { transform: scale(1.08); }
+  .color-swatch.is-selected {
+    border-color: var(--text-primary);
+  }
+  .color-swatch[data-color="default"] { --swatch-bg: var(--card-bg); }
+  .color-swatch[data-color="red"]    { --swatch-bg: #c97f7f; }
+  .color-swatch[data-color="orange"] { --swatch-bg: #cf9c6e; }
+  .color-swatch[data-color="yellow"] { --swatch-bg: #cdbb7e; }
+  .color-swatch[data-color="blue"]   { --swatch-bg: #8da3bd; }
 </style>
 </head>
 <body>
@@ -365,11 +438,23 @@
     <div class="modal-row">
       <div>
         <label>目標日期</label>
-        <input type="text" id="eventDate" placeholder="YYYY/MM/DD">
+        <input type="text" id="eventDate" placeholder="年/月/日">
+        <div class="field-error hide" id="eventDateError">請輸入正確的日期格式，例如：2022/12/28</div>
       </div>
       <div>
         <label>時間（選填）</label>
-        <input type="text" id="eventTime" placeholder="HH:MM">
+        <input type="text" id="eventTime" placeholder="時:分">
+        <div class="field-error hide" id="eventTimeError">請輸入正確的時間格式，例如：12:28</div>
+      </div>
+    </div>
+    <div>
+      <label>卡片顏色</label>
+      <div class="color-picker" id="colorPicker">
+        <button type="button" class="color-swatch is-selected" data-color="default" aria-label="預設顏色" title="預設"></button>
+        <button type="button" class="color-swatch" data-color="red" aria-label="紅色" title="紅"></button>
+        <button type="button" class="color-swatch" data-color="orange" aria-label="橘色" title="橘"></button>
+        <button type="button" class="color-swatch" data-color="yellow" aria-label="黃色" title="黃"></button>
+        <button type="button" class="color-swatch" data-color="blue" aria-label="藍色" title="藍"></button>
       </div>
     </div>
     <div class="modal-buttons">
@@ -386,6 +471,26 @@ const THEME_KEY = 'countdown-theme';
 
 let events = [];
 let editingId = null;
+let selectedColor = 'default';
+let originalColor = 'default';
+
+// ---- 隨機 placeholder 例句 ----
+const NAME_PLACEHOLDERS = [
+  '例如：旅行',
+  '例如：紀念日',
+  '例如：生日',
+  '例如：畢業典禮',
+  '例如：搬新家',
+  '例如：演唱會',
+  '例如：考試結束',
+  '例如：跟朋友的聚餐',
+  '例如：遊戲發行日',
+  '例如：期待的展覽'
+];
+
+function getRandomPlaceholder() {
+  return NAME_PLACEHOLDERS[Math.floor(Math.random() * NAME_PLACEHOLDERS.length)];
+}
 
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -458,7 +563,7 @@ eventTimeInput.addEventListener('input', autoFormatTime);
 function saveEvents() {
   try {
     localStorage.setItem(EVENTS_KEY, JSON.stringify(
-      events.map(e => ({ id: e.id, name: e.name, target: e.target.getTime() }))
+      events.map(e => ({ id: e.id, name: e.name, target: e.target.getTime(), color: e.color || 'default' }))
     ));
   } catch (e) {}
 }
@@ -469,7 +574,7 @@ function loadEvents() {
     if (!raw) return [];
     const data = JSON.parse(raw);
     return data
-      .map(e => ({ id: e.id, name: e.name, target: new Date(e.target) }))
+      .map(e => ({ id: e.id, name: e.name, target: new Date(e.target), color: e.color || 'default' }))
       .filter(e => !isNaN(e.target.getTime()));
   } catch (e) { return []; }
 }
@@ -481,6 +586,8 @@ const eventModalTitle = document.getElementById('eventModalTitle');
 const eventDeleteBtn = document.getElementById('eventDelete');
 const eventCancelBtn = document.getElementById('eventCancel');
 const eventConfirmBtn = document.getElementById('eventConfirm');
+const eventDateError = document.getElementById('eventDateError');
+const eventTimeError = document.getElementById('eventTimeError');
 
 function renderEvents() {
   eventsContainer.innerHTML = '';
@@ -488,12 +595,14 @@ function renderEvents() {
   events.forEach(ev => {
     const card = document.createElement('div');
     card.className = 'card';
+    card.id = `card-${ev.id}`;
+    card.dataset.color = ev.color || 'default';
     card.innerHTML = `
       <div class="card-header">
         <button class="glass-btn settings-btn" aria-label="設定" title="設定">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 13a7.97 7.97 0 0 0 0-2l2.05-1.6-2-3.46-2.42.97a8 8 0 0 0-1.73-1L14.94 3h-3.88l-.36 2.91a8 8 0 0 0-1.73 1l-2.42-.97-2 3.46L6.6 11a7.97 7.97 0 0 0 0 2l-2.05 1.6 2 3.46 2.42-.97a8 8 0 0 0 1.73 1l.36 2.91h3.88l.36-2.91a8 8 0 0 0 1.73-1l2.42.97 2-3.46L19.4 13z"></path>
+            <circle cx="12" cy="12" r="3.2"></circle>
+            <path d="M 9.86 2.74 L 14.14 2.74 L 13.62 4.98 L 15.82 5.89 L 17.03 3.94 L 20.06 6.97 L 18.11 8.18 L 19.02 10.38 L 21.26 9.86 L 21.26 14.14 L 19.02 13.62 L 18.11 15.82 L 20.06 17.03 L 17.03 20.06 L 15.82 18.11 L 13.62 19.02 L 14.14 21.26 L 9.86 21.26 L 10.38 19.02 L 8.18 18.11 L 6.97 20.06 L 3.94 17.03 L 5.89 15.82 L 4.98 13.62 L 2.74 14.14 L 2.74 9.86 L 4.98 10.38 L 5.89 8.18 L 3.94 6.97 L 6.97 3.94 L 8.18 5.89 L 10.38 4.98 Z" stroke-linejoin="round"></path>
           </svg>
         </button>
       </div>
@@ -650,9 +759,14 @@ function openAddModal() {
   editingId = null;
   eventModalTitle.textContent = '新增事件';
   eventNameInput.value = '';
+  eventNameInput.placeholder = getRandomPlaceholder();
   eventDateInput.value = '';
   eventTimeInput.value = '';
   eventDeleteBtn.classList.add('hide');
+  eventDateError.classList.add('hide');
+  eventTimeError.classList.add('hide');
+  originalColor = 'default';
+  setSelectedColor('default');
   eventOverlay.classList.remove('hide');
 }
 
@@ -665,10 +779,42 @@ function openEditModal(id) {
   eventDateInput.value = formatDateForInput(ev.target);
   eventTimeInput.value = formatTimeForInput(ev.target);
   eventDeleteBtn.classList.remove('hide');
+  eventDateError.classList.add('hide');
+  eventTimeError.classList.add('hide');
+  originalColor = ev.color || 'default';
+  setSelectedColor(originalColor);
   eventOverlay.classList.remove('hide');
 }
 
+// ---- 卡片顏色選擇器 ----
+const colorPicker = document.getElementById('colorPicker');
+const modalEl = document.querySelector('.modal');
+
+function setSelectedColor(color) {
+  selectedColor = color;
+  colorPicker.querySelectorAll('.color-swatch').forEach(btn => {
+    btn.classList.toggle('is-selected', btn.dataset.color === color);
+  });
+  modalEl.dataset.color = color;
+
+  // 若是編輯既有事件，即時更新對應卡片的顏色
+  if (editingId !== null) {
+    const cardEl = document.getElementById(`card-${editingId}`);
+    if (cardEl) cardEl.dataset.color = color;
+  }
+}
+
+colorPicker.addEventListener('click', (e) => {
+  const btn = e.target.closest('.color-swatch');
+  if (!btn) return;
+  setSelectedColor(btn.dataset.color);
+});
+
 eventCancelBtn.addEventListener('click', () => {
+  if (editingId !== null) {
+    const cardEl = document.getElementById(`card-${editingId}`);
+    if (cardEl) cardEl.dataset.color = originalColor;
+  }
   eventOverlay.classList.add('hide');
 });
 
@@ -682,14 +828,22 @@ eventDeleteBtn.addEventListener('click', () => {
 
 eventConfirmBtn.addEventListener('click', () => {
   const name = eventNameInput.value.trim();
+  const dateOk = parseDateInput(eventDateInput.value) !== null;
+  const timeOk = parseTimeInput(eventTimeInput.value) !== null;
+
+  eventDateError.classList.toggle('hide', dateOk);
+  eventTimeError.classList.toggle('hide', timeOk);
+
+  if (!name || !dateOk || !timeOk) return;
+
   const target = buildDate(eventDateInput.value, eventTimeInput.value);
-  if (!name || !target) return;
+  if (!target) return;
 
   if (editingId !== null) {
     const ev = events.find(e => e.id === editingId);
-    if (ev) { ev.name = name; ev.target = target; }
+    if (ev) { ev.name = name; ev.target = target; ev.color = selectedColor; }
   } else {
-    events.push({ id: Date.now(), name, target });
+    events.push({ id: Date.now(), name, target, color: selectedColor });
   }
   saveEvents();
   renderEvents();
