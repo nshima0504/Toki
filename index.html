@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toki</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-start: #2c2c2e;
+    --bg-end: #1c1c1c;
+    --card-bg: rgba(255,255,255,0.08);
+    --card-border: rgba(255,255,255,0.16);
+    --card-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+    --text-primary: #f5f5f7;
+    --text-secondary: rgba(245,245,247,0.6);
+    --text-tertiary: rgba(245,245,247,0.4);
+    --text-quaternary: rgba(245,245,247,0.3);
+    --control-bg: rgba(255,255,255,0.06);
+    --control-bg-hover: rgba(255,255,255,0.12);
+    --control-border: rgba(255,255,255,0.15);
+    --icon-stroke: rgba(245,245,247,0.6);
+    --modal-bg: rgba(255,255,255,0.1);
+    --modal-border: rgba(255,255,255,0.18);
+    --input-bg: rgba(255,255,255,0.08);
+    --input-border: rgba(255,255,255,0.15);
+    --button-bg: rgba(255,255,255,0.06);
+    --button-border: rgba(255,255,255,0.15);
+    --button-primary-bg: rgba(255,255,255,0.18);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg-start: #eceef1;
+      --bg-end: #d9dbdf;
+      --card-bg: rgba(255,255,255,0.55);
+      --card-border: rgba(0,0,0,0.08);
+      --card-shadow: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+      --text-primary: #1c1c1e;
+      --text-secondary: rgba(28,28,30,0.55);
+      --text-tertiary: rgba(28,28,30,0.38);
+      --text-quaternary: rgba(28,28,30,0.25);
+      --control-bg: rgba(0,0,0,0.04);
+      --control-bg-hover: rgba(0,0,0,0.08);
+      --control-border: rgba(0,0,0,0.1);
+      --icon-stroke: rgba(28,28,30,0.6);
+      --modal-bg: rgba(255,255,255,0.65);
+      --modal-border: rgba(0,0,0,0.08);
+      --input-bg: rgba(0,0,0,0.04);
+      --input-border: rgba(0,0,0,0.1);
+      --button-bg: rgba(0,0,0,0.04);
+      --button-border: rgba(0,0,0,0.1);
+      --button-primary-bg: rgba(0,0,0,0.1);
+    }
+  }
+
+  :root[data-theme="light"] {
+    --bg-start: #eceef1;
+    --bg-end: #d9dbdf;
+    --card-bg: rgba(255,255,255,0.55);
+    --card-border: rgba(0,0,0,0.08);
+    --card-shadow: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+    --text-primary: #1c1c1e;
+    --text-secondary: rgba(28,28,30,0.55);
+    --text-tertiary: rgba(28,28,30,0.38);
+    --text-quaternary: rgba(28,28,30,0.25);
+    --control-bg: rgba(0,0,0,0.04);
+    --control-bg-hover: rgba(0,0,0,0.08);
+    --control-border: rgba(0,0,0,0.1);
+    --icon-stroke: rgba(28,28,30,0.6);
+    --modal-bg: rgba(255,255,255,0.65);
+    --modal-border: rgba(0,0,0,0.08);
+    --input-bg: rgba(0,0,0,0.04);
+    --input-border: rgba(0,0,0,0.1);
+    --button-bg: rgba(0,0,0,0.04);
+    --button-border: rgba(0,0,0,0.1);
+    --button-primary-bg: rgba(0,0,0,0.1);
+  }
+
+  html {
+    height: 100%;
+    background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    transition: background 0.3s ease;
+  }
+
+  body {
+    min-height: 100%;
+    font-family: -apple-system, "SF Pro Display", "PingFang TC", "Noto Sans TC", sans-serif;
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    padding: 88px 16px 40px;
+  }
+
+  .events {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .card {
+    position: relative;
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 32px;
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    padding: 48px 40px;
+    box-shadow: var(--card-shadow);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .event-title {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    padding-right: 40px;
+  }
+
+  .big-time {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 16px;
+    font-weight: 600;
+  }
+  .big-time .num { font-size: 72px; letter-spacing: -2px; }
+  .big-time .unit { font-size: 20px; color: var(--text-secondary); font-weight: 400; margin-right: 8px; }
+  .big-time .unit:last-child { margin-right: 0; }
+
+  .small-time {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+  }
+  .small-time .seg { font-size: 28px; font-weight: 500; }
+  .small-time .ms { font-size: 19px; font-weight: 400; min-width: 40px; text-align: left; color: var(--text-tertiary); }
+  .small-time .sep { font-size: 20px; color: var(--text-quaternary); }
+
+  .status-label {
+    text-align: center;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-tertiary);
+    margin-top: 24px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 600px) {
+    .card { padding: 36px 24px; }
+    .event-title { font-size: 16px; margin-bottom: 20px; }
+    .big-time { gap: 10px; }
+    .big-time .num { font-size: 48px; letter-spacing: -1px; }
+    .big-time .unit { font-size: 16px; margin-right: 6px; }
+    .small-time { gap: 4px; margin-top: 10px; }
+    .small-time .seg { font-size: 22px; }
+    .small-time .ms { font-size: 15px; min-width: 32px; }
+    .small-time .sep { font-size: 16px; }
+    .status-label { font-size: 12px; margin-top: 18px; }
+  }
+
+  .add-card {
+    border: 1px dashed var(--card-border);
+    background: transparent;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 180px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .add-card:hover { border-color: var(--control-border); color: var(--text-secondary); }
+  .add-card .add-icon { font-size: 32px; font-weight: 400; line-height: 1; }
+  .add-card .add-label { font-size: 14px; }
+
+  .glass-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--control-border);
+    background: var(--control-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .glass-btn:hover { background: var(--control-bg-hover); }
+  .glass-btn svg { width: 18px; height: 18px; }
+  .glass-btn path, .glass-btn circle, .glass-btn line {
+    stroke: var(--icon-stroke);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    fill: none;
+  }
+
+  .settings-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 5;
+  }
+  .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
+  .theme-toggle.is-light .icon-sun { display: block; }
+  .theme-toggle:not(.is-light) .icon-moon { display: block; }
+
+  /* modal */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .overlay.hide { display: none; }
+
+  .modal {
+    width: calc(100% - 80px);
+    max-width: 440px;
+    background: var(--modal-bg);
+    border: 1px solid var(--modal-border);
+    border-radius: 24px;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .modal h3 { font-size: 20px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+  .modal label { font-size: 15px; color: var(--text-secondary); }
+  .modal input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text-primary);
+    font-size: 17px;
+    outline: none;
+    margin-top: 8px;
+  }
+  .modal-row { display: flex; gap: 12px; }
+  .modal-row > div { flex: 1; }
+  .modal-buttons { display: flex; gap: 12px; margin-top: 8px; }
+  .modal-buttons button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--button-border);
+    background: var(--button-bg);
+    color: var(--text-primary);
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .modal-buttons button.primary {
+    background: var(--button-primary-bg);
+    font-weight: 500;
+  }
+  .modal-buttons button.hide { display: none; }
+</style>
+</head>
+<body>
+
+<button class="glass-btn theme-toggle" id="themeToggle" aria-label="切換深淺色模式" title="切換深淺色模式">
+  <svg class="icon-sun" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="4"></circle>
+    <line x1="12" y1="2" x2="12" y2="4"></line>
+    <line x1="12" y1="20" x2="12" y2="22"></line>
+    <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line>
+    <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line>
+    <line x1="2" y1="12" x2="4" y2="12"></line>
+    <line x1="20" y1="12" x2="22" y2="12"></line>
+    <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line>
+    <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+<div class="events" id="eventsContainer"></div>
+
+<div class="overlay hide" id="eventOverlay">
+  <div class="modal">
+    <h3 id="eventModalTitle">新增事件</h3>
+    <div>
+      <label>事件名稱</label>
+      <input type="text" id="eventName" placeholder="例如：日本旅行">
+    </div>
+    <div class="modal-row">
+      <div>
+        <label>目標日期</label>
+        <input type="text" id="eventDate" placeholder="YYYY/MM/DD">
+      </div>
+      <div>
+        <label>時間（選填）</label>
+        <input type="text" id="eventTime" placeholder="HH:MM">
+      </div>
+    </div>
+    <div class="modal-buttons">
+      <button id="eventDelete" class="hide">刪除</button>
+      <button id="eventCancel">取消</button>
+      <button class="primary" id="eventConfirm">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const EVENTS_KEY = 'countdown-events';
+const THEME_KEY = 'countdown-theme';
+
+let events = [];
+let editingId = null;
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function parseDateInput(str) {
+  if (!str) return null;
+  const m = str.trim().match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  if (!m) return null;
+  const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+  if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+  return { y, mo, d };
+}
+
+function parseTimeInput(str) {
+  if (!str || !str.trim()) return { h: 0, mi: 0 };
+  const m = str.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return null;
+  const h = Number(m[1]), mi = Number(m[2]);
+  if (h > 23 || mi > 59) return null;
+  return { h, mi };
+}
+
+function buildDate(dateStr, timeStr) {
+  const d = parseDateInput(dateStr);
+  if (!d) return null;
+  const t = parseTimeInput(timeStr);
+  if (!t) return null;
+  const date = new Date(d.y, d.mo - 1, d.d, t.h, t.mi, 0, 0);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateForInput(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}/${m}/${d}`;
+}
+
+function formatTimeForInput(date) {
+  const h = String(date.getHours()).padStart(2, '0');
+  const mi = String(date.getMinutes()).padStart(2, '0');
+  return `${h}:${mi}`;
+}
+
+function autoFormatDate(e) {
+  const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+  let formatted = digits;
+  if (digits.length > 4) formatted = digits.slice(0, 4) + '/' + digits.slice(4);
+  if (digits.length > 6) formatted = digits.slice(0, 4) + '/' + digits.slice(4, 6) + '/' + digits.slice(6);
+  e.target.value = formatted;
+}
+
+function autoFormatTime(e) {
+  const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+  let formatted = digits;
+  if (digits.length > 2) formatted = digits.slice(0, 2) + ':' + digits.slice(2);
+  e.target.value = formatted;
+}
+
+const eventNameInput = document.getElementById('eventName');
+const eventDateInput = document.getElementById('eventDate');
+const eventTimeInput = document.getElementById('eventTime');
+eventDateInput.addEventListener('input', autoFormatDate);
+eventTimeInput.addEventListener('input', autoFormatTime);
+
+// ---- 讀取/寫入本地記憶 ----
+function saveEvents() {
+  try {
+    localStorage.setItem(EVENTS_KEY, JSON.stringify(
+      events.map(e => ({ id: e.id, name: e.name, target: e.target.getTime() }))
+    ));
+  } catch (e) {}
+}
+
+function loadEvents() {
+  try {
+    const raw = localStorage.getItem(EVENTS_KEY);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    return data
+      .map(e => ({ id: e.id, name: e.name, target: new Date(e.target) }))
+      .filter(e => !isNaN(e.target.getTime()));
+  } catch (e) { return []; }
+}
+
+// ---- 事件卡片渲染 ----
+const eventsContainer = document.getElementById('eventsContainer');
+const eventOverlay = document.getElementById('eventOverlay');
+const eventModalTitle = document.getElementById('eventModalTitle');
+const eventDeleteBtn = document.getElementById('eventDelete');
+const eventCancelBtn = document.getElementById('eventCancel');
+const eventConfirmBtn = document.getElementById('eventConfirm');
+
+function renderEvents() {
+  eventsContainer.innerHTML = '';
+
+  events.forEach(ev => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <button class="glass-btn settings-btn" aria-label="設定" title="設定">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 13a7.97 7.97 0 0 0 0-2l2.05-1.6-2-3.46-2.42.97a8 8 0 0 0-1.73-1L14.94 3h-3.88l-.36 2.91a8 8 0 0 0-1.73 1l-2.42-.97-2 3.46L6.6 11a7.97 7.97 0 0 0 0 2l-2.05 1.6 2 3.46 2.42-.97a8 8 0 0 0 1.73 1l.36 2.91h3.88l.36-2.91a8 8 0 0 0 1.73-1l2.42.97 2-3.46L19.4 13z"></path>
+        </svg>
+      </button>
+      <div class="event-title">${escapeHtml(ev.name)}</div>
+      <div class="big-time">
+        <span class="num" id="years-${ev.id}">--</span><span class="unit">年</span>
+        <span class="num" id="days-${ev.id}">--</span><span class="unit">天</span>
+      </div>
+      <div class="small-time">
+        <span class="seg" id="hours-${ev.id}">--</span><span class="sep">:</span>
+        <span class="seg" id="minutes-${ev.id}">--</span><span class="sep">:</span>
+        <span class="seg" id="seconds-${ev.id}">--</span><span class="sep">:</span>
+        <span class="ms" id="ms-${ev.id}">---</span>
+      </div>
+      <div class="status-label" id="status-${ev.id}">倒數中</div>
+    `;
+    card.querySelector('.settings-btn').addEventListener('click', () => openEditModal(ev.id));
+    eventsContainer.appendChild(card);
+  });
+
+  const addCard = document.createElement('div');
+  addCard.className = 'card add-card';
+  addCard.innerHTML = `<span class="add-icon">+</span><span class="add-label">新增一個倒數</span>`;
+  addCard.addEventListener('click', openAddModal);
+  eventsContainer.appendChild(addCard);
+}
+
+// ---- modal ----
+function openAddModal() {
+  editingId = null;
+  eventModalTitle.textContent = '新增事件';
+  eventNameInput.value = '';
+  eventDateInput.value = '';
+  eventTimeInput.value = '';
+  eventDeleteBtn.classList.add('hide');
+  eventOverlay.classList.remove('hide');
+}
+
+function openEditModal(id) {
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+  editingId = id;
+  eventModalTitle.textContent = '編輯事件';
+  eventNameInput.value = ev.name;
+  eventDateInput.value = formatDateForInput(ev.target);
+  eventTimeInput.value = formatTimeForInput(ev.target);
+  eventDeleteBtn.classList.remove('hide');
+  eventOverlay.classList.remove('hide');
+}
+
+eventCancelBtn.addEventListener('click', () => {
+  eventOverlay.classList.add('hide');
+});
+
+eventDeleteBtn.addEventListener('click', () => {
+  if (editingId === null) return;
+  events = events.filter(e => e.id !== editingId);
+  saveEvents();
+  renderEvents();
+  eventOverlay.classList.add('hide');
+});
+
+eventConfirmBtn.addEventListener('click', () => {
+  const name = eventNameInput.value.trim();
+  const target = buildDate(eventDateInput.value, eventTimeInput.value);
+  if (!name || !target) return;
+
+  if (editingId !== null) {
+    const ev = events.find(e => e.id === editingId);
+    if (ev) { ev.name = name; ev.target = target; }
+  } else {
+    events.push({ id: Date.now(), name, target });
+  }
+  saveEvents();
+  renderEvents();
+  eventOverlay.classList.add('hide');
+});
+
+// 載入已記憶的事件
+events = loadEvents();
+renderEvents();
+
+// ---- 深淺色模式 ----
+const root = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+
+function getEffectiveTheme() {
+  const explicit = root.getAttribute('data-theme');
+  if (explicit) return explicit;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function updateToggleUI() {
+  themeToggle.classList.toggle('is-light', getEffectiveTheme() === 'light');
+}
+
+try {
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    root.setAttribute('data-theme', savedTheme);
+  }
+} catch (e) {}
+
+themeToggle.addEventListener('click', () => {
+  const next = getEffectiveTheme() === 'light' ? 'dark' : 'light';
+  root.setAttribute('data-theme', next);
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  updateToggleUI();
+});
+
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+  if (!root.getAttribute('data-theme')) updateToggleUI();
+});
+
+updateToggleUI();
+
+// ---- 倒數/正數計算 ----
+function computeParts(diffMs) {
+  const past = diffMs < 0;
+  let ms = Math.abs(diffMs);
+  const msPerDay = 86400000;
+  const msPerYear = 365.25 * msPerDay;
+
+  const years = Math.floor(ms / msPerYear);
+  let rest = ms - years * msPerYear;
+  const days = Math.floor(rest / msPerDay);
+  rest -= days * msPerDay;
+  const hours = Math.floor(rest / 3600000);
+  rest -= hours * 3600000;
+  const minutes = Math.floor(rest / 60000);
+  rest -= minutes * 60000;
+  const seconds = Math.floor(rest / 1000);
+  const millis = Math.floor(rest % 1000);
+
+  return { past, years, days, hours, minutes, seconds, millis };
+}
+
+// ---- countdown loop ----
+function tick() {
+  const now = Date.now();
+  events.forEach(ev => {
+    const diff = ev.target.getTime() - now;
+    const p = computeParts(diff);
+
+    const yearsEl = document.getElementById(`years-${ev.id}`);
+    if (!yearsEl) return;
+
+    yearsEl.textContent = p.years;
+    document.getElementById(`days-${ev.id}`).textContent = p.days;
+    document.getElementById(`hours-${ev.id}`).textContent = String(p.hours).padStart(2, '0');
+    document.getElementById(`minutes-${ev.id}`).textContent = String(p.minutes).padStart(2, '0');
+    document.getElementById(`seconds-${ev.id}`).textContent = String(p.seconds).padStart(2, '0');
+    document.getElementById(`ms-${ev.id}`).textContent = String(p.millis).padStart(3, '0');
+    document.getElementById(`status-${ev.id}`).textContent = p.past ? '已經過去' : '倒數中';
+  });
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+
+</body>
+</html>
