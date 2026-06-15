@@ -145,7 +145,16 @@
   }
   .big-time .num { font-size: 72px; letter-spacing: -2px; }
   .big-time .unit { font-size: 20px; color: var(--text-secondary); font-weight: 400; margin-right: 8px; }
-  .big-time .unit:last-child { margin-right: 0; }
+  .big-time .year-group .unit,
+  .big-time .day-group .unit { margin-right: 0; }
+  .big-time .year-group,
+  .big-time .day-group {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .big-time .hide { display: none; }
+  .big-time.empty { display: none; }
 
   .small-time {
     display: flex;
@@ -156,6 +165,12 @@
     font-variant-numeric: tabular-nums;
     color: var(--text-secondary);
   }
+  .small-time.is-main {
+    margin-top: 0;
+  }
+  .small-time.is-main .seg { font-size: 56px; font-weight: 600; color: var(--text-primary); }
+  .small-time.is-main .ms { font-size: 28px; min-width: 60px; color: var(--text-secondary); }
+  .small-time.is-main .sep { font-size: 40px; }
   .small-time .seg { font-size: 28px; font-weight: 500; }
   .small-time .ms { font-size: 19px; font-weight: 400; min-width: 40px; text-align: left; color: var(--text-tertiary); }
   .small-time .sep { font-size: 20px; color: var(--text-quaternary); }
@@ -176,6 +191,10 @@
     .big-time .num { font-size: 48px; letter-spacing: -1px; }
     .big-time .unit { font-size: 16px; margin-right: 6px; }
     .small-time { gap: 4px; margin-top: 10px; }
+    .small-time.is-main { margin-top: 0; }
+    .small-time.is-main .seg { font-size: 38px; }
+    .small-time.is-main .ms { font-size: 20px; min-width: 44px; }
+    .small-time.is-main .sep { font-size: 28px; }
     .small-time .seg { font-size: 22px; }
     .small-time .ms { font-size: 15px; min-width: 32px; }
     .small-time .sep { font-size: 16px; }
@@ -473,11 +492,11 @@ function renderEvents() {
         </button>
       </div>
       <div class="event-title">${escapeHtml(ev.name)}</div>
-      <div class="big-time">
-        <span class="num" id="years-${ev.id}">--</span><span class="unit">年</span>
-        <span class="num" id="days-${ev.id}">--</span><span class="unit">天</span>
+      <div class="big-time" id="bigTime-${ev.id}">
+        <span class="year-group hide" id="yearGroup-${ev.id}"><span class="num" id="years-${ev.id}">--</span><span class="unit">年</span></span>
+        <span class="day-group hide" id="dayGroup-${ev.id}"><span class="num" id="days-${ev.id}">--</span><span class="unit">天</span></span>
       </div>
-      <div class="small-time">
+      <div class="small-time" id="smallTime-${ev.id}">
         <span class="seg" id="hours-${ev.id}">--</span><span class="sep">:</span>
         <span class="seg" id="minutes-${ev.id}">--</span><span class="sep">:</span>
         <span class="seg" id="seconds-${ev.id}">--</span><span class="sep">:</span>
@@ -523,8 +542,10 @@ function attachDragHandlers(card, id) {
 function startDrag(card, id, startY, pointerId) {
   const cards = Array.from(eventsContainer.querySelectorAll('.card:not(.add-card)'));
   const startIndex = events.findIndex(e => e.id === id);
-  const rect = card.getBoundingClientRect();
-  const slotHeight = rect.height + GAP;
+
+  // 記錄每張卡片各自的高度（含間距），因為卡片高度可能不一致
+  const heights = cards.map(c => c.getBoundingClientRect().height + GAP);
+  const cardHeight = heights[startIndex];
 
   card.classList.add('dragging');
   card.style.transition = 'none';
@@ -534,7 +555,7 @@ function startDrag(card, id, startY, pointerId) {
     if (c !== card) c.style.transition = 'transform 0.25s ease';
   });
 
-  dragState = { id, card, startY, startIndex, currentIndex: startIndex, slotHeight, cards };
+  dragState = { id, card, startY, startIndex, currentIndex: startIndex, cardHeight, heights, cards };
 
   document.addEventListener('pointermove', onDragMove);
   document.addEventListener('pointerup', onDragEnd);
@@ -542,20 +563,43 @@ function startDrag(card, id, startY, pointerId) {
 
 function onDragMove(e) {
   if (!dragState) return;
+  const { startIndex, heights, cards } = dragState;
   const deltaY = e.clientY - dragState.startY;
   dragState.card.style.transform = `translateY(${deltaY}px) scale(1.02)`;
 
-  let newIndex = dragState.startIndex + Math.round(deltaY / dragState.slotHeight);
+  // 依移動方向，逐張累加經過的卡片高度，找出目前所在的index
+  let newIndex = startIndex;
+  if (deltaY > 0) {
+    let acc = 0;
+    for (let i = startIndex + 1; i < heights.length; i++) {
+      acc += heights[i];
+      if (deltaY > acc - heights[i] / 2) {
+        newIndex = i;
+      } else {
+        break;
+      }
+    }
+  } else if (deltaY < 0) {
+    let acc = 0;
+    for (let i = startIndex - 1; i >= 0; i--) {
+      acc += heights[i];
+      if (-deltaY > acc - heights[i] / 2) {
+        newIndex = i;
+      } else {
+        break;
+      }
+    }
+  }
   newIndex = Math.max(0, Math.min(events.length - 1, newIndex));
   dragState.currentIndex = newIndex;
 
-  dragState.cards.forEach((c, i) => {
-    if (i === dragState.startIndex) return;
+  cards.forEach((c, i) => {
+    if (i === startIndex) return;
     let shift = 0;
-    if (newIndex > dragState.startIndex && i > dragState.startIndex && i <= newIndex) {
-      shift = -dragState.slotHeight;
-    } else if (newIndex < dragState.startIndex && i < dragState.startIndex && i >= newIndex) {
-      shift = dragState.slotHeight;
+    if (newIndex > startIndex && i > startIndex && i <= newIndex) {
+      shift = -heights[startIndex];
+    } else if (newIndex < startIndex && i < startIndex && i >= newIndex) {
+      shift = heights[startIndex];
     }
     c.style.transform = `translateY(${shift}px)`;
   });
@@ -563,8 +607,15 @@ function onDragMove(e) {
 
 function onDragEnd() {
   if (!dragState) return;
-  const { card, startIndex, currentIndex, cards, slotHeight } = dragState;
-  const finalOffset = (currentIndex - startIndex) * slotHeight;
+  const { card, startIndex, currentIndex, cards, heights } = dragState;
+
+  // 拖曳卡片最終落點：依經過的卡片各自高度加總
+  let finalOffset = 0;
+  if (currentIndex > startIndex) {
+    for (let i = startIndex + 1; i <= currentIndex; i++) finalOffset += heights[i];
+  } else if (currentIndex < startIndex) {
+    for (let i = currentIndex; i < startIndex; i++) finalOffset -= heights[i];
+  }
 
   card.style.transition = 'transform 0.25s ease';
   card.style.transform = `translateY(${finalOffset}px) scale(1)`;
@@ -678,15 +729,12 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
 updateToggleUI();
 
 // ---- 倒數計算 ----
-function computeParts(diffMs) {
+function computeParts(diffMs, targetDate) {
   const ms = Math.max(diffMs, 0);
   const msPerDay = 86400000;
-  const msPerYear = 365.25 * msPerDay;
 
-  const years = Math.floor(ms / msPerYear);
-  let rest = ms - years * msPerYear;
-  const days = Math.floor(rest / msPerDay);
-  rest -= days * msPerDay;
+  const totalDays = Math.floor(ms / msPerDay);
+  let rest = ms - totalDays * msPerDay;
   const hours = Math.floor(rest / 3600000);
   rest -= hours * 3600000;
   const minutes = Math.floor(rest / 60000);
@@ -694,10 +742,45 @@ function computeParts(diffMs) {
   const seconds = Math.floor(rest / 1000);
   const millis = Math.floor(rest % 1000);
 
+  // 用實際日曆年計算「年」與「剩餘天數」，避免 365.25 天零頭
+  let years = 0;
+  let days = totalDays;
+  if (targetDate) {
+    const now = new Date(Date.now());
+    years = targetDate.getFullYear() - now.getFullYear();
+    const anchor = new Date(now);
+    anchor.setFullYear(anchor.getFullYear() + years);
+    if (anchor.getTime() > targetDate.getTime()) {
+      years -= 1;
+      anchor.setFullYear(anchor.getFullYear() - 1);
+    }
+    if (years > 0) {
+      days = Math.floor((targetDate.getTime() - anchor.getTime()) / msPerDay);
+    }
+  }
+
   return { years, days, hours, minutes, seconds, millis };
 }
 
 // ---- countdown loop ----
+function applyBigTimeLayout(ev, years, days) {
+  const bigTime = document.getElementById(`bigTime-${ev.id}`);
+  const yearGroup = document.getElementById(`yearGroup-${ev.id}`);
+  const dayGroup = document.getElementById(`dayGroup-${ev.id}`);
+  const smallTime = document.getElementById(`smallTime-${ev.id}`);
+  if (!bigTime || !yearGroup || !dayGroup || !smallTime) return;
+
+  const showYear = years > 0;
+  const showDay = years > 0 || days > 0;
+
+  yearGroup.classList.toggle('hide', !showYear);
+  dayGroup.classList.toggle('hide', !showDay);
+
+  const bigEmpty = !showYear && !showDay;
+  bigTime.classList.toggle('empty', bigEmpty);
+  smallTime.classList.toggle('is-main', bigEmpty);
+}
+
 function tick() {
   const now = Date.now();
   events.forEach(ev => {
@@ -713,10 +796,11 @@ function tick() {
       document.getElementById(`seconds-${ev.id}`).textContent = '00';
       document.getElementById(`ms-${ev.id}`).textContent = '000';
       document.getElementById(`status-${ev.id}`).textContent = '完成';
+      applyBigTimeLayout(ev, 0, 0);
       return;
     }
 
-    const p = computeParts(diff);
+    const p = computeParts(diff, ev.target);
     yearsEl.textContent = p.years;
     document.getElementById(`days-${ev.id}`).textContent = p.days;
     document.getElementById(`hours-${ev.id}`).textContent = String(p.hours).padStart(2, '0');
@@ -724,6 +808,7 @@ function tick() {
     document.getElementById(`seconds-${ev.id}`).textContent = String(p.seconds).padStart(2, '0');
     document.getElementById(`ms-${ev.id}`).textContent = String(p.millis).padStart(3, '0');
     document.getElementById(`status-${ev.id}`).textContent = '倒數中';
+    applyBigTimeLayout(ev, p.years, p.days);
   });
   requestAnimationFrame(tick);
 }
