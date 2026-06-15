@@ -165,6 +165,12 @@
     font-variant-numeric: tabular-nums;
     color: var(--text-secondary);
   }
+  .small-time .hour-group {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .small-time .hour-group.hide { display: none; }
   .small-time.is-main {
     margin-top: 0;
   }
@@ -497,7 +503,7 @@ function renderEvents() {
         <span class="day-group hide" id="dayGroup-${ev.id}"><span class="num" id="days-${ev.id}">--</span><span class="unit">天</span></span>
       </div>
       <div class="small-time" id="smallTime-${ev.id}">
-        <span class="seg" id="hours-${ev.id}">--</span><span class="sep">:</span>
+        <span class="hour-group" id="hourGroup-${ev.id}"><span class="seg" id="hours-${ev.id}">--</span><span class="sep">:</span></span>
         <span class="seg" id="minutes-${ev.id}">--</span><span class="sep">:</span>
         <span class="seg" id="seconds-${ev.id}">--</span><span class="sep">:</span>
         <span class="ms" id="ms-${ev.id}">---</span>
@@ -763,18 +769,21 @@ function computeParts(diffMs, targetDate) {
 }
 
 // ---- countdown loop ----
-function applyBigTimeLayout(ev, years, days) {
+function applyBigTimeLayout(ev, years, days, hours) {
   const bigTime = document.getElementById(`bigTime-${ev.id}`);
   const yearGroup = document.getElementById(`yearGroup-${ev.id}`);
   const dayGroup = document.getElementById(`dayGroup-${ev.id}`);
   const smallTime = document.getElementById(`smallTime-${ev.id}`);
-  if (!bigTime || !yearGroup || !dayGroup || !smallTime) return;
+  const hourGroup = document.getElementById(`hourGroup-${ev.id}`);
+  if (!bigTime || !yearGroup || !dayGroup || !smallTime || !hourGroup) return;
 
   const showYear = years > 0;
   const showDay = years > 0 || days > 0;
+  const showHour = showDay || hours > 0;
 
   yearGroup.classList.toggle('hide', !showYear);
   dayGroup.classList.toggle('hide', !showDay);
+  hourGroup.classList.toggle('hide', !showHour);
 
   const bigEmpty = !showYear && !showDay;
   bigTime.classList.toggle('empty', bigEmpty);
@@ -796,7 +805,7 @@ function tick() {
       document.getElementById(`seconds-${ev.id}`).textContent = '00';
       document.getElementById(`ms-${ev.id}`).textContent = '000';
       document.getElementById(`status-${ev.id}`).textContent = '完成';
-      applyBigTimeLayout(ev, 0, 0);
+      applyBigTimeLayout(ev, 0, 0, 0);
       return;
     }
 
@@ -808,7 +817,7 @@ function tick() {
     document.getElementById(`seconds-${ev.id}`).textContent = String(p.seconds).padStart(2, '0');
     document.getElementById(`ms-${ev.id}`).textContent = String(p.millis).padStart(3, '0');
     document.getElementById(`status-${ev.id}`).textContent = '倒數中';
-    applyBigTimeLayout(ev, p.years, p.days);
+    applyBigTimeLayout(ev, p.years, p.days, p.hours);
   });
   requestAnimationFrame(tick);
 }
