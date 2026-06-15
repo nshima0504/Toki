@@ -114,13 +114,18 @@
     transition: background 0.3s ease, border-color 0.3s ease;
   }
 
+  .card-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+
   .event-title {
     text-align: center;
     font-size: 18px;
     font-weight: 500;
     color: var(--text-primary);
     margin-bottom: 24px;
-    padding-right: 40px;
   }
 
   .big-time {
@@ -208,11 +213,27 @@
     fill: none;
   }
 
-  .settings-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+  .card.dragging {
+    z-index: 20;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.32);
+    cursor: grabbing;
+    user-select: none;
+    touch-action: none;
   }
+
+  .drag-handle {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+    padding: 6px;
+    cursor: grab;
+    touch-action: none;
+  }
+  .drag-handle svg { width: 28px; height: 14px; }
+  .drag-handle circle { fill: var(--text-tertiary); transition: fill 0.2s; }
+  .drag-handle:hover circle { fill: var(--text-secondary); }
+  .card.dragging .drag-handle { cursor: grabbing; }
+  .card.dragging .drag-handle circle { fill: var(--text-secondary); }
 
   .theme-toggle {
     position: fixed;
@@ -437,12 +458,14 @@ function renderEvents() {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <button class="glass-btn settings-btn" aria-label="設定" title="設定">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 13a7.97 7.97 0 0 0 0-2l2.05-1.6-2-3.46-2.42.97a8 8 0 0 0-1.73-1L14.94 3h-3.88l-.36 2.91a8 8 0 0 0-1.73 1l-2.42-.97-2 3.46L6.6 11a7.97 7.97 0 0 0 0 2l-2.05 1.6 2 3.46 2.42-.97a8 8 0 0 0 1.73 1l.36 2.91h3.88l.36-2.91a8 8 0 0 0 1.73-1l2.42.97 2-3.46L19.4 13z"></path>
-        </svg>
-      </button>
+      <div class="card-header">
+        <button class="glass-btn settings-btn" aria-label="設定" title="設定">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 13a7.97 7.97 0 0 0 0-2l2.05-1.6-2-3.46-2.42.97a8 8 0 0 0-1.73-1L14.94 3h-3.88l-.36 2.91a8 8 0 0 0-1.73 1l-2.42-.97-2 3.46L6.6 11a7.97 7.97 0 0 0 0 2l-2.05 1.6 2 3.46 2.42-.97a8 8 0 0 0 1.73 1l.36 2.91h3.88l.36-2.91a8 8 0 0 0 1.73-1l2.42.97 2-3.46L19.4 13z"></path>
+          </svg>
+        </button>
+      </div>
       <div class="event-title">${escapeHtml(ev.name)}</div>
       <div class="big-time">
         <span class="num" id="years-${ev.id}">--</span><span class="unit">年</span>
@@ -455,8 +478,19 @@ function renderEvents() {
         <span class="ms" id="ms-${ev.id}">---</span>
       </div>
       <div class="status-label" id="status-${ev.id}">倒數中</div>
+      <div class="drag-handle" title="拖曳排序">
+        <svg viewBox="0 0 24 12" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="4" cy="3" r="1.5"></circle>
+          <circle cx="12" cy="3" r="1.5"></circle>
+          <circle cx="20" cy="3" r="1.5"></circle>
+          <circle cx="4" cy="9" r="1.5"></circle>
+          <circle cx="12" cy="9" r="1.5"></circle>
+          <circle cx="20" cy="9" r="1.5"></circle>
+        </svg>
+      </div>
     `;
     card.querySelector('.settings-btn').addEventListener('click', () => openEditModal(ev.id));
+    attachDragHandlers(card, ev.id);
     eventsContainer.appendChild(card);
   });
 
@@ -465,6 +499,87 @@ function renderEvents() {
   addCard.innerHTML = `<span class="add-icon">+</span><span class="add-label">新增一個倒數</span>`;
   addCard.addEventListener('click', openAddModal);
   eventsContainer.appendChild(addCard);
+}
+
+// ---- 拖曳把手排序 ----
+const GAP = 24;
+let dragState = null;
+
+function attachDragHandlers(card, id) {
+  const handle = card.querySelector('.drag-handle');
+  handle.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    startDrag(card, id, e.clientY, e.pointerId);
+  });
+}
+
+function startDrag(card, id, startY, pointerId) {
+  const cards = Array.from(eventsContainer.querySelectorAll('.card:not(.add-card)'));
+  const startIndex = events.findIndex(e => e.id === id);
+  const rect = card.getBoundingClientRect();
+  const slotHeight = rect.height + GAP;
+
+  card.classList.add('dragging');
+  card.style.transition = 'none';
+  card.setPointerCapture(pointerId);
+
+  cards.forEach(c => {
+    if (c !== card) c.style.transition = 'transform 0.25s ease';
+  });
+
+  dragState = { id, card, startY, startIndex, currentIndex: startIndex, slotHeight, cards };
+
+  document.addEventListener('pointermove', onDragMove);
+  document.addEventListener('pointerup', onDragEnd);
+}
+
+function onDragMove(e) {
+  if (!dragState) return;
+  const deltaY = e.clientY - dragState.startY;
+  dragState.card.style.transform = `translateY(${deltaY}px) scale(1.02)`;
+
+  let newIndex = dragState.startIndex + Math.round(deltaY / dragState.slotHeight);
+  newIndex = Math.max(0, Math.min(events.length - 1, newIndex));
+  dragState.currentIndex = newIndex;
+
+  dragState.cards.forEach((c, i) => {
+    if (i === dragState.startIndex) return;
+    let shift = 0;
+    if (newIndex > dragState.startIndex && i > dragState.startIndex && i <= newIndex) {
+      shift = -dragState.slotHeight;
+    } else if (newIndex < dragState.startIndex && i < dragState.startIndex && i >= newIndex) {
+      shift = dragState.slotHeight;
+    }
+    c.style.transform = `translateY(${shift}px)`;
+  });
+}
+
+function onDragEnd() {
+  if (!dragState) return;
+  const { card, startIndex, currentIndex, cards, slotHeight } = dragState;
+  const finalOffset = (currentIndex - startIndex) * slotHeight;
+
+  card.style.transition = 'transform 0.25s ease';
+  card.style.transform = `translateY(${finalOffset}px) scale(1)`;
+
+  document.removeEventListener('pointermove', onDragMove);
+  document.removeEventListener('pointerup', onDragEnd);
+
+  setTimeout(() => {
+    if (currentIndex !== startIndex) {
+      const [moved] = events.splice(startIndex, 1);
+      events.splice(currentIndex, 0, moved);
+      saveEvents();
+    }
+    cards.forEach(c => {
+      c.style.transition = '';
+      c.style.transform = '';
+    });
+    card.classList.remove('dragging');
+    dragState = null;
+    renderEvents();
+  }, 250);
 }
 
 // ---- modal ----
@@ -556,10 +671,9 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
 
 updateToggleUI();
 
-// ---- 倒數/正數計算 ----
+// ---- 倒數計算 ----
 function computeParts(diffMs) {
-  const past = diffMs < 0;
-  let ms = Math.abs(diffMs);
+  const ms = Math.max(diffMs, 0);
   const msPerDay = 86400000;
   const msPerYear = 365.25 * msPerDay;
 
@@ -574,7 +688,7 @@ function computeParts(diffMs) {
   const seconds = Math.floor(rest / 1000);
   const millis = Math.floor(rest % 1000);
 
-  return { past, years, days, hours, minutes, seconds, millis };
+  return { years, days, hours, minutes, seconds, millis };
 }
 
 // ---- countdown loop ----
@@ -582,18 +696,28 @@ function tick() {
   const now = Date.now();
   events.forEach(ev => {
     const diff = ev.target.getTime() - now;
-    const p = computeParts(diff);
-
     const yearsEl = document.getElementById(`years-${ev.id}`);
     if (!yearsEl) return;
 
+    if (diff <= 0) {
+      yearsEl.textContent = 0;
+      document.getElementById(`days-${ev.id}`).textContent = 0;
+      document.getElementById(`hours-${ev.id}`).textContent = '00';
+      document.getElementById(`minutes-${ev.id}`).textContent = '00';
+      document.getElementById(`seconds-${ev.id}`).textContent = '00';
+      document.getElementById(`ms-${ev.id}`).textContent = '000';
+      document.getElementById(`status-${ev.id}`).textContent = '完成';
+      return;
+    }
+
+    const p = computeParts(diff);
     yearsEl.textContent = p.years;
     document.getElementById(`days-${ev.id}`).textContent = p.days;
     document.getElementById(`hours-${ev.id}`).textContent = String(p.hours).padStart(2, '0');
     document.getElementById(`minutes-${ev.id}`).textContent = String(p.minutes).padStart(2, '0');
     document.getElementById(`seconds-${ev.id}`).textContent = String(p.seconds).padStart(2, '0');
     document.getElementById(`ms-${ev.id}`).textContent = String(p.millis).padStart(3, '0');
-    document.getElementById(`status-${ev.id}`).textContent = p.past ? '已經過去' : '倒數中';
+    document.getElementById(`status-${ev.id}`).textContent = '倒數中';
   });
   requestAnimationFrame(tick);
 }
