@@ -8,8 +8,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg-start: #2c2c2e;
-    --bg-end: #1c1c1c;
+    --bg-color: #232325;
     --card-bg: rgba(255,255,255,0.08);
     --card-border: rgba(255,255,255,0.16);
     --card-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
@@ -32,8 +31,7 @@
 
   @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
-      --bg-start: #eceef1;
-      --bg-end: #d9dbdf;
+      --bg-color: #e6e8eb;
       --card-bg: rgba(255,255,255,0.55);
       --card-border: rgba(0,0,0,0.08);
       --card-shadow: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
@@ -56,8 +54,7 @@
   }
 
   :root[data-theme="light"] {
-    --bg-start: #eceef1;
-    --bg-end: #d9dbdf;
+    --bg-color: #e6e8eb;
     --card-bg: rgba(255,255,255,0.55);
     --card-border: rgba(0,0,0,0.08);
     --card-shadow: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
@@ -80,7 +77,7 @@
 
   html {
     height: 100%;
-    background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    background: var(--bg-color);
     transition: background 0.3s ease;
   }
 
@@ -90,12 +87,22 @@
     color: var(--text-primary);
     display: flex;
     justify-content: center;
-    padding: 88px 16px 40px;
+    padding: 40px 16px;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 24px;
   }
 
   .events {
     width: 100%;
-    max-width: 560px;
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -235,15 +242,6 @@
   .card.dragging .drag-handle { cursor: grabbing; }
   .card.dragging .drag-handle circle { fill: var(--text-secondary); }
 
-  .theme-toggle {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    z-index: 5;
-    transform: translateZ(0);
-    -webkit-transform: translate3d(0, 0, 0);
-    will-change: transform;
-  }
   .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
   .theme-toggle.is-light .icon-sun { display: block; }
   .theme-toggle:not(.is-light) .icon-moon { display: block; }
@@ -308,24 +306,28 @@
 </head>
 <body>
 
-<button class="glass-btn theme-toggle" id="themeToggle" aria-label="切換深淺色模式" title="切換深淺色模式">
-  <svg class="icon-sun" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="4"></circle>
-    <line x1="12" y1="2" x2="12" y2="4"></line>
-    <line x1="12" y1="20" x2="12" y2="22"></line>
-    <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line>
-    <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line>
-    <line x1="2" y1="12" x2="4" y2="12"></line>
-    <line x1="20" y1="12" x2="22" y2="12"></line>
-    <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line>
-    <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line>
-  </svg>
-  <svg class="icon-moon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-  </svg>
-</button>
+<div class="page">
+  <div class="page-header">
+    <button class="glass-btn theme-toggle" id="themeToggle" aria-label="切換深淺色模式" title="切換深淺色模式">
+      <svg class="icon-sun" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="4"></circle>
+        <line x1="12" y1="2" x2="12" y2="4"></line>
+        <line x1="12" y1="20" x2="12" y2="22"></line>
+        <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line>
+        <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line>
+        <line x1="2" y1="12" x2="4" y2="12"></line>
+        <line x1="20" y1="12" x2="22" y2="12"></line>
+        <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line>
+        <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+  </div>
 
-<div class="events" id="eventsContainer"></div>
+  <div class="events" id="eventsContainer"></div>
+</div>
 
 <div class="overlay hide" id="eventOverlay">
   <div class="modal">
