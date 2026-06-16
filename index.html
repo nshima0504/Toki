@@ -267,6 +267,8 @@
   .card.is-small .event-title {
     font-size: 14px;
     margin-bottom: 12px;
+    margin-right: 36px;
+    text-align: left;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -883,41 +885,34 @@ function onDragMove(e) {
   if (others.length === 0) return;
 
   const draggedRect = card.getBoundingClientRect();
-  const draggedArea = draggedRect.width * draggedRect.height;
+  const draggedIsSmall = card.classList.contains('is-small');
+  const draggedCx = draggedRect.left + draggedRect.width / 2;
+  const draggedCy = draggedRect.top + draggedRect.height / 2;
 
-  // 用「拖曳中卡片」跟每張其他卡片的實際重疊面積判斷懸停目標，
-  // 取代純粹比較指標座標距離——指標在卡片上的抓握點不固定，
-  // 用重疊面積才能讓兩個方向的觸發距離一致
-  let hoveredId = null;
-  let hoveredEl = null;
-  let maxArea = 0;
-  others.forEach(c => {
-    const r = c.getBoundingClientRect();
-    const overlapW = Math.min(draggedRect.right, r.right) - Math.max(draggedRect.left, r.left);
-    const overlapH = Math.min(draggedRect.bottom, r.bottom) - Math.max(draggedRect.top, r.top);
-    const area = (overlapW > 0 && overlapH > 0) ? overlapW * overlapH : 0;
-    const threshold = Math.min(draggedArea, r.width * r.height) * 0.12;
-    if (area > threshold && area > maxArea) {
-      maxArea = area;
-      hoveredId = idFromCardEl(c);
-      hoveredEl = c;
-    }
-  });
-
-  // 完全沒有重疊（例如拖到清單尾端空白處）時，退回用中心點距離找最近的卡片，避免卡死沒反應
-  if (hoveredId === null) {
-    let closestDist = Infinity;
+  // 用「拖曳中卡片的中心點」到每張其他卡片中心點的距離判斷懸停目標，
+  // 取代之前用重疊面積的做法——距離比較單純，不會因為卡片尺寸不同
+  // （大卡跟小卡面積差很多）讓門檻換算出乎意料的結果。
+  // 拖曳中是小卡時，優先考慮其他小卡，避免被旁邊整排寬度的大卡搶走判斷
+  function pickHovered(preferSmall) {
+    let bestId = null, bestEl = null, bestDist = Infinity;
     others.forEach(c => {
+      if (preferSmall && c.classList.contains('is-large')) return;
       const r = c.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
-      const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
-      if (dist < closestDist) {
-        closestDist = dist;
-        hoveredId = idFromCardEl(c);
-        hoveredEl = c;
+      const dist = Math.hypot(draggedCx - cx, draggedCy - cy);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestId = idFromCardEl(c);
+        bestEl = c;
       }
     });
+    return { bestId, bestEl };
+  }
+
+  let { bestId: hoveredId, bestEl: hoveredEl } = draggedIsSmall ? pickHovered(true) : pickHovered(false);
+  if (hoveredId === null && draggedIsSmall) {
+    ({ bestId: hoveredId, bestEl: hoveredEl } = pickHovered(false));
   }
   if (hoveredId === null) return;
 
@@ -981,6 +976,7 @@ function onDragMove(e) {
       const markSettled = () => {
         if (settled) return;
         settled = true;
+        el.style.transition = '';
         if (dragState) dragState.pendingAnimations = Math.max(0, dragState.pendingAnimations - 1);
       };
       el.style.transition = 'none';
