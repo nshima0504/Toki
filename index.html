@@ -135,8 +135,8 @@
 
   .events {
     width: 100%;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 24px;
   }
 
@@ -150,13 +150,42 @@
     -webkit-backdrop-filter: blur(24px) saturate(160%);
     padding: 48px 40px;
     box-shadow: var(--card-shadow);
-    transition: background 0.3s ease, border-color 0.3s ease;
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card.is-large {
+    grid-column: 1 / -1;
+    min-height: 280px;
+  }
+
+  .card.is-small {
+    grid-column: span 1;
+    min-height: 232px;
+    padding: 28px 20px;
   }
 
   .card-header {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1;
+  }
+  .card.is-small .card-header {
+    top: 14px;
+    right: 14px;
+  }
+
+  .card-content {
+    flex: 1;
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 8px;
+    flex-direction: column;
+    min-height: 0;
+    padding-bottom: 28px;
+  }
+  .card.is-small .card-content {
+    padding-bottom: 20px;
   }
 
   .event-title {
@@ -165,6 +194,18 @@
     font-weight: 500;
     color: var(--text-primary);
     margin-bottom: 24px;
+  }
+
+  .time-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 140px;
+  }
+  .card.is-small .time-display {
+    min-height: 90px;
   }
 
   .big-time {
@@ -196,6 +237,7 @@
     font-variant-numeric: tabular-nums;
     color: var(--text-secondary);
   }
+  .small-time.hide { display: none; }
   .small-time .hour-group {
     display: flex;
     align-items: baseline;
@@ -221,6 +263,35 @@
     line-height: 1.6;
   }
 
+  /* ---- 小卡片 (1x1) 精簡排版 ---- */
+  .card.is-small .event-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card.is-small .big-time { gap: 8px; }
+  .card.is-small .big-time .num { font-size: 36px; letter-spacing: -1px; }
+  .card.is-small .big-time .unit { font-size: 14px; margin-right: 4px; }
+  .card.is-small .big-time .year-group,
+  .card.is-small .big-time .day-group { gap: 4px; }
+  .card.is-small .small-time { gap: 4px; margin-top: 6px; }
+  .card.is-small .small-time .hour-group { gap: 4px; }
+  .card.is-small .small-time.is-main { margin-top: 0; }
+  .card.is-small .small-time.is-main .seg { font-size: 30px; }
+  .card.is-small .small-time.is-main .sep { font-size: 22px; }
+  .card.is-small .small-time.is-main .ms { font-size: 15px; min-width: 32px; }
+  .card.is-small .small-time .seg { font-size: 16px; }
+  .card.is-small .small-time .sep { font-size: 13px; }
+  /* 小卡片預設不顯示毫秒、不顯示狀態文字、不顯示拖曳把手提示文字；
+     只有在沒有顯示小時（倒數已不到 1 小時）時才補上千分之一秒 */
+  .card.is-small .small-time .ms { display: none; }
+  .card.is-small .small-time .ms-sep { display: none; }
+  .card.is-small .small-time.show-ms .ms { display: inline; }
+  .card.is-small .small-time.show-ms .ms-sep { display: inline; }
+  .card.is-small .status-label { margin-top: 10px; font-size: 11px; }
+
   @media (max-width: 600px) {
     .card { padding: 36px 24px; }
     .event-title { font-size: 16px; margin-bottom: 20px; }
@@ -238,9 +309,18 @@
     .status-label { font-size: 12px; margin-top: 18px; }
     .modal { padding: 28px 20px; }
     .modal input { font-size: 15px; padding: 14px 12px; }
+    .time-display { min-height: 96px; }
+    .card.is-small { padding: 20px 16px; min-height: 200px; }
+    .card.is-small .time-display { min-height: 78px; }
+    .card.is-small .event-title { font-size: 13px; margin-bottom: 8px; }
+    .card.is-small .big-time .num { font-size: 28px; }
+    .card.is-small .small-time.is-main .seg { font-size: 24px; }
+    .card.is-small .small-time.is-main .sep { font-size: 18px; }
+    .card.is-small .small-time .seg { font-size: 14px; }
   }
 
   .add-card {
+    grid-column: 1 / -1;
     border: 1px dashed var(--card-border);
     background: transparent;
     box-shadow: none;
@@ -280,17 +360,34 @@
   }
 
   .card.dragging {
-    z-index: 20;
+    position: fixed;
+    margin: 0;
+    transition: none !important;
+    transform: scale(1.03);
+    z-index: 100;
     box-shadow: 0 16px 48px rgba(0,0,0,0.32);
     cursor: grabbing;
     user-select: none;
     touch-action: none;
+    pointer-events: none;
+  }
+
+  .card-placeholder {
+    background: transparent;
+    border: 1px dashed var(--card-border);
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    pointer-events: none;
   }
 
   .drag-handle {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
     display: flex;
     justify-content: center;
-    margin-top: 18px;
     padding: 6px;
     cursor: grab;
     touch-action: none;
@@ -401,6 +498,30 @@
   .color-swatch[data-color="orange"] { --swatch-bg: #cf9c6e; }
   .color-swatch[data-color="yellow"] { --swatch-bg: #cdbb7e; }
   .color-swatch[data-color="blue"]   { --swatch-bg: #8da3bd; }
+
+  /* 大小選擇器 */
+  .size-picker {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .size-swatch {
+    padding: 10px 22px;
+    border-radius: 12px;
+    border: 1px solid var(--button-border);
+    background: var(--button-bg);
+    color: var(--text-secondary);
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .size-swatch:hover { background: var(--control-bg-hover); }
+  .size-swatch.is-selected {
+    background: var(--button-primary-bg);
+    color: var(--text-primary);
+    font-weight: 500;
+    border-color: var(--text-primary);
+  }
 </style>
 </head>
 <body>
@@ -457,6 +578,13 @@
         <button type="button" class="color-swatch" data-color="blue" aria-label="藍色" title="藍"></button>
       </div>
     </div>
+    <div>
+      <label>卡片大小</label>
+      <div class="size-picker" id="sizePicker">
+        <button type="button" class="size-swatch is-selected" data-size="large">大</button>
+        <button type="button" class="size-swatch" data-size="small">小</button>
+      </div>
+    </div>
     <div class="modal-buttons">
       <button id="eventDelete" class="hide">刪除</button>
       <button id="eventCancel">取消</button>
@@ -473,6 +601,8 @@ let events = [];
 let editingId = null;
 let selectedColor = 'default';
 let originalColor = 'default';
+let selectedSize = 'large';
+let originalSize = 'large';
 
 // ---- 隨機 placeholder 例句 ----
 const NAME_PLACEHOLDERS = [
@@ -563,7 +693,7 @@ eventTimeInput.addEventListener('input', autoFormatTime);
 function saveEvents() {
   try {
     localStorage.setItem(EVENTS_KEY, JSON.stringify(
-      events.map(e => ({ id: e.id, name: e.name, target: e.target.getTime(), color: e.color || 'default' }))
+      events.map(e => ({ id: e.id, name: e.name, target: e.target.getTime(), color: e.color || 'default', size: e.size || 'large' }))
     ));
   } catch (e) {}
 }
@@ -574,7 +704,7 @@ function loadEvents() {
     if (!raw) return [];
     const data = JSON.parse(raw);
     return data
-      .map(e => ({ id: e.id, name: e.name, target: new Date(e.target), color: e.color || 'default' }))
+      .map(e => ({ id: e.id, name: e.name, target: new Date(e.target), color: e.color || 'default', size: e.size || 'large' }))
       .filter(e => !isNaN(e.target.getTime()));
   } catch (e) { return []; }
 }
@@ -594,7 +724,7 @@ function renderEvents() {
 
   events.forEach(ev => {
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = `card ${ev.size === 'small' ? 'is-small' : 'is-large'}`;
     card.id = `card-${ev.id}`;
     card.dataset.color = ev.color || 'default';
     card.innerHTML = `
@@ -606,18 +736,22 @@ function renderEvents() {
           </svg>
         </button>
       </div>
-      <div class="event-title">${escapeHtml(ev.name)}</div>
-      <div class="big-time" id="bigTime-${ev.id}">
-        <span class="year-group hide" id="yearGroup-${ev.id}"><span class="num" id="years-${ev.id}">--</span><span class="unit">年</span></span>
-        <span class="day-group hide" id="dayGroup-${ev.id}"><span class="num" id="days-${ev.id}">--</span><span class="unit">天</span></span>
+      <div class="card-content">
+        <div class="event-title">${escapeHtml(ev.name)}</div>
+        <div class="time-display">
+          <div class="big-time" id="bigTime-${ev.id}">
+            <span class="year-group hide" id="yearGroup-${ev.id}"><span class="num" id="years-${ev.id}">--</span><span class="unit">年</span></span>
+            <span class="day-group hide" id="dayGroup-${ev.id}"><span class="num" id="days-${ev.id}">--</span><span class="unit">天</span></span>
+          </div>
+          <div class="small-time" id="smallTime-${ev.id}">
+            <span class="hour-group" id="hourGroup-${ev.id}"><span class="seg" id="hours-${ev.id}">--</span><span class="sep">:</span></span>
+            <span class="seg" id="minutes-${ev.id}">--</span><span class="sep">:</span>
+            <span class="seg" id="seconds-${ev.id}">--</span><span class="sep ms-sep">:</span>
+            <span class="ms" id="ms-${ev.id}">---</span>
+          </div>
+        </div>
+        <div class="status-label" id="status-${ev.id}">倒數中</div>
       </div>
-      <div class="small-time" id="smallTime-${ev.id}">
-        <span class="hour-group" id="hourGroup-${ev.id}"><span class="seg" id="hours-${ev.id}">--</span><span class="sep">:</span></span>
-        <span class="seg" id="minutes-${ev.id}">--</span><span class="sep">:</span>
-        <span class="seg" id="seconds-${ev.id}">--</span><span class="sep">:</span>
-        <span class="ms" id="ms-${ev.id}">---</span>
-      </div>
-      <div class="status-label" id="status-${ev.id}">倒數中</div>
       <div class="drag-handle" title="拖曳排序">
         <svg viewBox="0 0 24 12" xmlns="http://www.w3.org/2000/svg">
           <circle cx="4" cy="3" r="1.5"></circle>
@@ -641,8 +775,7 @@ function renderEvents() {
   eventsContainer.appendChild(addCard);
 }
 
-// ---- 拖曳把手排序 ----
-const GAP = 24;
+// ---- 拖曳把手排序（即時擠開，類似 iOS 排列 icon / widget）----
 let dragState = null;
 
 function attachDragHandlers(card, id) {
@@ -650,108 +783,256 @@ function attachDragHandlers(card, id) {
   handle.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     e.preventDefault();
-    startDrag(card, id, e.clientY, e.pointerId);
+    startDrag(card, id, e.clientX, e.clientY, e.pointerId);
   });
 }
 
-function startDrag(card, id, startY, pointerId) {
-  const cards = Array.from(eventsContainer.querySelectorAll('.card:not(.add-card)'));
-  const startIndex = events.findIndex(e => e.id === id);
+function idFromCardEl(el) {
+  return Number(el.id.slice('card-'.length));
+}
 
-  // 記錄每張卡片各自的高度（含間距），因為卡片高度可能不一致
-  const heights = cards.map(c => c.getBoundingClientRect().height + GAP);
-  const cardHeight = heights[startIndex];
+// 依照 order（不含正在拖曳的卡片）取得對應 DOM 元素
+function elFromId(id) {
+  if (dragState && id === dragState.id) return dragState.placeholder;
+  return document.getElementById(`card-${id}`);
+}
+
+function sizeOfId(tid) {
+  const el = elFromId(tid);
+  return (el && el.classList.contains('is-large')) ? 'large' : 'small';
+}
+
+// 在 order 陣列中找出 targetId 所屬的「整排」範圍（大卡自己一排；
+// 小卡跟旁邊相鄰的小卡兩個一排），回傳 [起始index, 結束index]
+function findRowBounds(order, targetId) {
+  let i = 0;
+  while (i < order.length) {
+    if (sizeOfId(order[i]) === 'large') {
+      if (order[i] === targetId) return [i, i];
+      i += 1;
+      continue;
+    }
+    let end = i;
+    if (i + 1 < order.length && sizeOfId(order[i + 1]) === 'small') end = i + 1;
+    if (targetId === order[i] || (end > i && targetId === order[end])) return [i, end];
+    i = end + 1;
+  }
+  return null;
+}
+
+function startDrag(card, id, startX, startY, pointerId) {
+  const rect = card.getBoundingClientRect();
+  const addCardEl = eventsContainer.querySelector('.add-card');
+
+  // 用一個外觀一致、但透明虛線的佔位框取代原本卡片在排版流中的位置，
+  // 讓拖曳中的卡片可以脫離排版流（position: fixed）自由跟著指標移動
+  const placeholder = document.createElement('div');
+  placeholder.className = `card card-placeholder ${card.classList.contains('is-small') ? 'is-small' : 'is-large'}`;
+  eventsContainer.insertBefore(placeholder, card);
 
   card.classList.add('dragging');
-  card.style.transition = 'none';
-  card.setPointerCapture(pointerId);
+  card.style.width = rect.width + 'px';
+  card.style.height = rect.height + 'px';
+  card.style.left = rect.left + 'px';
+  card.style.top = rect.top + 'px';
 
-  cards.forEach(c => {
-    if (c !== card) c.style.transition = 'transform 0.25s ease';
-  });
+  try { card.setPointerCapture(pointerId); } catch (e) {}
 
-  dragState = { id, card, startY, startIndex, currentIndex: startIndex, cardHeight, heights, cards };
+  dragState = {
+    id,
+    card,
+    placeholder,
+    addCardEl,
+    pointerId,
+    offsetX: startX - rect.left,
+    offsetY: startY - rect.top,
+    liveOrder: events.map(ev => ev.id),
+    pendingAnimations: 0
+  };
 
   document.addEventListener('pointermove', onDragMove);
   document.addEventListener('pointerup', onDragEnd);
+  document.addEventListener('pointercancel', onDragEnd);
+}
+
+function reorderLiveDOM(order) {
+  // 依照 order 的順序，把佔位框與其他卡片依序插入到「新增卡片」之前
+  // 拖曳中的卡片本身是 position:fixed，不受影響，跳過即可
+  order.forEach(id => {
+    if (dragState && id === dragState.id) {
+      eventsContainer.insertBefore(dragState.placeholder, dragState.addCardEl);
+    } else {
+      const el = document.getElementById(`card-${id}`);
+      if (el) eventsContainer.insertBefore(el, dragState.addCardEl);
+    }
+  });
 }
 
 function onDragMove(e) {
   if (!dragState) return;
-  const { startIndex, heights, cards } = dragState;
-  const deltaY = e.clientY - dragState.startY;
-  dragState.card.style.transform = `translateY(${deltaY}px) scale(1.02)`;
+  const { card, offsetX, offsetY, id } = dragState;
 
-  // 依移動方向，逐張累加經過的卡片高度，找出目前所在的index
-  let newIndex = startIndex;
-  if (deltaY > 0) {
-    let acc = 0;
-    for (let i = startIndex + 1; i < heights.length; i++) {
-      acc += heights[i];
-      if (deltaY > acc - heights[i] / 2) {
-        newIndex = i;
-      } else {
-        break;
-      }
+  card.style.left = (e.clientX - offsetX) + 'px';
+  card.style.top = (e.clientY - offsetY) + 'px';
+
+  // 上一輪讓位動畫還沒定下來時，先不要評估新的交換，避免拿「正在移動中」的位置去判斷，
+  // 導致追著動畫本身的位移誤觸發、跟自己的動畫打架而抖動
+  if (dragState.pendingAnimations > 0) return;
+
+  const others = Array.from(eventsContainer.querySelectorAll('.card:not(.add-card):not(.card-placeholder):not(.dragging)'));
+  if (others.length === 0) return;
+
+  const draggedRect = card.getBoundingClientRect();
+  const draggedArea = draggedRect.width * draggedRect.height;
+
+  // 用「拖曳中卡片」跟每張其他卡片的實際重疊面積判斷懸停目標，
+  // 取代純粹比較指標座標距離——指標在卡片上的抓握點不固定，
+  // 用重疊面積才能讓兩個方向的觸發距離一致
+  let hoveredId = null;
+  let hoveredEl = null;
+  let maxArea = 0;
+  others.forEach(c => {
+    const r = c.getBoundingClientRect();
+    const overlapW = Math.min(draggedRect.right, r.right) - Math.max(draggedRect.left, r.left);
+    const overlapH = Math.min(draggedRect.bottom, r.bottom) - Math.max(draggedRect.top, r.top);
+    const area = (overlapW > 0 && overlapH > 0) ? overlapW * overlapH : 0;
+    const threshold = Math.min(draggedArea, r.width * r.height) * 0.12;
+    if (area > threshold && area > maxArea) {
+      maxArea = area;
+      hoveredId = idFromCardEl(c);
+      hoveredEl = c;
     }
-  } else if (deltaY < 0) {
-    let acc = 0;
-    for (let i = startIndex - 1; i >= 0; i--) {
-      acc += heights[i];
-      if (-deltaY > acc - heights[i] / 2) {
-        newIndex = i;
-      } else {
-        break;
+  });
+
+  // 完全沒有重疊（例如拖到清單尾端空白處）時，退回用中心點距離找最近的卡片，避免卡死沒反應
+  if (hoveredId === null) {
+    let closestDist = Infinity;
+    others.forEach(c => {
+      const r = c.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+      if (dist < closestDist) {
+        closestDist = dist;
+        hoveredId = idFromCardEl(c);
+        hoveredEl = c;
       }
-    }
+    });
   }
-  newIndex = Math.max(0, Math.min(events.length - 1, newIndex));
-  dragState.currentIndex = newIndex;
+  if (hoveredId === null) return;
 
-  cards.forEach((c, i) => {
-    if (i === startIndex) return;
-    let shift = 0;
-    if (newIndex > startIndex && i > startIndex && i <= newIndex) {
-      shift = -heights[startIndex];
-    } else if (newIndex < startIndex && i < startIndex && i >= newIndex) {
-      shift = heights[startIndex];
+  const hoveredRect = hoveredEl.getBoundingClientRect();
+
+  // 任一邊是佔滿整排的大卡時，前後關係要看「排與排」之間的垂直位置，
+  // 否則大卡寬度會同時蓋住整排、若只看水平位置會誤判；
+  // 兩邊都是同排小卡時，才用左右的水平位置判斷
+  let insertBefore;
+  if (card.classList.contains('is-large') || hoveredEl.classList.contains('is-large')) {
+    const dCy = draggedRect.top + draggedRect.height / 2;
+    const hCy = hoveredRect.top + hoveredRect.height / 2;
+    insertBefore = dCy < hCy;
+  } else {
+    const dCx = draggedRect.left + draggedRect.width / 2;
+    const hCx = hoveredRect.left + hoveredRect.width / 2;
+    insertBefore = dCx < hCx;
+  }
+
+  const withoutDragged = dragState.liveOrder.filter(i => i !== id);
+  const hoveredIndex = withoutDragged.indexOf(hoveredId);
+  if (hoveredIndex === -1) return;
+
+  // 拖曳中是大卡、懸停目標是小卡時，插入點要對齊「整排」的頭或尾，
+  // 不能插在配對好的兩張小卡正中間，否則會拆散配對留下網格空格
+  let insertAt = insertBefore ? hoveredIndex : hoveredIndex + 1;
+  const draggedIsLarge = card.classList.contains('is-large');
+  const hoveredIsSmall = !hoveredEl.classList.contains('is-large');
+  if (draggedIsLarge && hoveredIsSmall) {
+    const bounds = findRowBounds(withoutDragged, hoveredId);
+    if (bounds) insertAt = insertBefore ? bounds[0] : bounds[1] + 1;
+  }
+
+  const newLiveOrder = withoutDragged.slice();
+  newLiveOrder.splice(insertAt, 0, id);
+
+  if (newLiveOrder.join(',') === dragState.liveOrder.join(',')) return;
+
+  // 重新排列前先記錄目前其他卡片（含佔位框）的畫面位置，重排後用 FLIP 讓它們平滑滑到新位置
+  const trackedIds = dragState.liveOrder;
+  const firstRects = new Map();
+  trackedIds.forEach(tid => {
+    const el = elFromId(tid);
+    if (el) firstRects.set(tid, el.getBoundingClientRect());
+  });
+
+  dragState.liveOrder = newLiveOrder;
+  reorderLiveDOM(newLiveOrder);
+
+  newLiveOrder.forEach(tid => {
+    // tid 對應拖曳中卡片時，elFromId 會回傳佔位框──它才是真正佔據格子、需要平滑滑動的元素
+    const el = elFromId(tid);
+    const first = firstRects.get(tid);
+    if (!el || !first) return;
+    const last = el.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    if (dx || dy) {
+      dragState.pendingAnimations++;
+      let settled = false;
+      const markSettled = () => {
+        if (settled) return;
+        settled = true;
+        if (dragState) dragState.pendingAnimations = Math.max(0, dragState.pendingAnimations - 1);
+      };
+      el.style.transition = 'none';
+      el.style.transform = `translate(${dx}px, ${dy}px)`;
+      requestAnimationFrame(() => {
+        el.style.transition = 'transform 0.22s ease';
+        el.style.transform = '';
+        el.addEventListener('transitionend', markSettled, { once: true });
+        setTimeout(markSettled, 260);
+      });
     }
-    c.style.transform = `translateY(${shift}px)`;
   });
 }
 
 function onDragEnd() {
   if (!dragState) return;
-  const { card, startIndex, currentIndex, cards, heights } = dragState;
-
-  // 拖曳卡片最終落點：依經過的卡片各自高度加總
-  let finalOffset = 0;
-  if (currentIndex > startIndex) {
-    for (let i = startIndex + 1; i <= currentIndex; i++) finalOffset += heights[i];
-  } else if (currentIndex < startIndex) {
-    for (let i = currentIndex; i < startIndex; i++) finalOffset -= heights[i];
-  }
-
-  card.style.transition = 'transform 0.25s ease';
-  card.style.transform = `translateY(${finalOffset}px) scale(1)`;
+  const { card, placeholder, id, liveOrder } = dragState;
 
   document.removeEventListener('pointermove', onDragMove);
   document.removeEventListener('pointerup', onDragEnd);
+  document.removeEventListener('pointercancel', onDragEnd);
 
-  setTimeout(() => {
-    if (currentIndex !== startIndex) {
-      const [moved] = events.splice(startIndex, 1);
-      events.splice(currentIndex, 0, moved);
-      saveEvents();
-    }
-    cards.forEach(c => {
-      c.style.transition = '';
-      c.style.transform = '';
-    });
-    card.classList.remove('dragging');
-    dragState = null;
-    renderEvents();
-  }, 250);
+  // 把佔位框換回真正的卡片，再用 FLIP 讓卡片從目前浮動位置平滑滑入排版位置
+  const floatingRect = card.getBoundingClientRect();
+  eventsContainer.insertBefore(card, placeholder);
+  placeholder.remove();
+
+  card.classList.remove('dragging');
+  card.style.width = '';
+  card.style.height = '';
+  card.style.left = '';
+  card.style.top = '';
+
+  const settledRect = card.getBoundingClientRect();
+  const dx = floatingRect.left - settledRect.left;
+  const dy = floatingRect.top - settledRect.top;
+  card.style.transition = 'none';
+  card.style.transform = `translate(${dx}px, ${dy}px) scale(1.03)`;
+  requestAnimationFrame(() => {
+    card.style.transition = 'transform 0.25s ease';
+    card.style.transform = '';
+    const cleanup = () => { card.style.transition = ''; card.style.transform = ''; };
+    card.addEventListener('transitionend', cleanup, { once: true });
+    setTimeout(cleanup, 280);
+  });
+
+  // 依照拖曳過程中即時計算出的最終順序，同步資料並存檔
+  const idToEvent = new Map(events.map(ev => [ev.id, ev]));
+  events = liveOrder.map(tid => idToEvent.get(tid)).filter(Boolean);
+  saveEvents();
+
+  dragState = null;
 }
 
 // ---- modal ----
@@ -767,6 +1048,8 @@ function openAddModal() {
   eventTimeError.classList.add('hide');
   originalColor = 'default';
   setSelectedColor('default');
+  originalSize = 'large';
+  setSelectedSize('large');
   eventOverlay.classList.remove('hide');
 }
 
@@ -783,6 +1066,8 @@ function openEditModal(id) {
   eventTimeError.classList.add('hide');
   originalColor = ev.color || 'default';
   setSelectedColor(originalColor);
+  originalSize = ev.size || 'large';
+  setSelectedSize(originalSize);
   eventOverlay.classList.remove('hide');
 }
 
@@ -810,10 +1095,39 @@ colorPicker.addEventListener('click', (e) => {
   setSelectedColor(btn.dataset.color);
 });
 
+// ---- 卡片大小選擇器 ----
+const sizePicker = document.getElementById('sizePicker');
+
+function setSelectedSize(size) {
+  selectedSize = size;
+  sizePicker.querySelectorAll('.size-swatch').forEach(btn => {
+    btn.classList.toggle('is-selected', btn.dataset.size === size);
+  });
+
+  // 若是編輯既有事件，即時更新對應卡片的大小
+  if (editingId !== null) {
+    const cardEl = document.getElementById(`card-${editingId}`);
+    if (cardEl) {
+      cardEl.classList.toggle('is-large', size === 'large');
+      cardEl.classList.toggle('is-small', size === 'small');
+    }
+  }
+}
+
+sizePicker.addEventListener('click', (e) => {
+  const btn = e.target.closest('.size-swatch');
+  if (!btn) return;
+  setSelectedSize(btn.dataset.size);
+});
+
 eventCancelBtn.addEventListener('click', () => {
   if (editingId !== null) {
     const cardEl = document.getElementById(`card-${editingId}`);
-    if (cardEl) cardEl.dataset.color = originalColor;
+    if (cardEl) {
+      cardEl.dataset.color = originalColor;
+      cardEl.classList.toggle('is-large', originalSize === 'large');
+      cardEl.classList.toggle('is-small', originalSize === 'small');
+    }
   }
   eventOverlay.classList.add('hide');
 });
@@ -841,9 +1155,9 @@ eventConfirmBtn.addEventListener('click', () => {
 
   if (editingId !== null) {
     const ev = events.find(e => e.id === editingId);
-    if (ev) { ev.name = name; ev.target = target; ev.color = selectedColor; }
+    if (ev) { ev.name = name; ev.target = target; ev.color = selectedColor; ev.size = selectedSize; }
   } else {
-    events.push({ id: Date.now(), name, target, color: selectedColor });
+    events.push({ id: Date.now(), name, target, color: selectedColor, size: selectedSize });
   }
   saveEvents();
   renderEvents();
@@ -924,15 +1238,32 @@ function computeParts(diffMs, targetDate) {
 
 // ---- countdown loop ----
 function applyBigTimeLayout(ev, years, days, hours) {
+  const card = document.getElementById(`card-${ev.id}`);
   const bigTime = document.getElementById(`bigTime-${ev.id}`);
   const yearGroup = document.getElementById(`yearGroup-${ev.id}`);
   const dayGroup = document.getElementById(`dayGroup-${ev.id}`);
   const smallTime = document.getElementById(`smallTime-${ev.id}`);
   const hourGroup = document.getElementById(`hourGroup-${ev.id}`);
-  if (!bigTime || !yearGroup || !dayGroup || !smallTime || !hourGroup) return;
+  if (!card || !bigTime || !yearGroup || !dayGroup || !smallTime || !hourGroup) return;
 
   const showYear = years > 0;
   const showDay = years > 0 || days > 0;
+  const isSmallCard = card.classList.contains('is-small');
+
+  if (isSmallCard) {
+    // 小卡片：年/天與時分秒二選一顯示，不同時佔用兩行空間
+    const bigEmpty = !showYear && !showDay;
+    const showHourSmall = bigEmpty && hours > 0;
+    yearGroup.classList.toggle('hide', !showYear);
+    dayGroup.classList.toggle('hide', !showDay);
+    hourGroup.classList.toggle('hide', !showHourSmall);
+    bigTime.classList.toggle('empty', bigEmpty);
+    smallTime.classList.toggle('hide', !bigEmpty);
+    smallTime.classList.toggle('is-main', bigEmpty);
+    smallTime.classList.toggle('show-ms', bigEmpty && !showHourSmall);
+    return;
+  }
+
   const showHour = showDay || hours > 0;
 
   yearGroup.classList.toggle('hide', !showYear);
