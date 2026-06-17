@@ -148,7 +148,7 @@
     border-radius: 32px;
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
-    padding: 48px 40px;
+    padding: 0 40px 48px;
     box-shadow: var(--card-shadow);
     transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
     display: flex;
@@ -163,7 +163,7 @@
   .card.is-small {
     grid-column: span 1;
     min-height: 232px;
-    padding: 28px 20px;
+    padding: 0 20px 28px;
   }
 
   .card-header {
@@ -173,8 +173,23 @@
     z-index: 1;
   }
   .card.is-small .card-header {
-    top: 14px;
     right: 14px;
+  }
+
+  .card-title-row {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px;
+    pointer-events: none;
+  }
+  .card.is-small .card-title-row {
+    padding: 0 20px;
   }
 
   .card-content {
@@ -182,6 +197,7 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    padding-top: 76px;
     padding-bottom: 28px;
   }
   .card.is-small .card-content {
@@ -193,7 +209,9 @@
     font-size: 18px;
     font-weight: 500;
     color: var(--text-primary);
-    margin-bottom: 24px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .time-display {
@@ -266,10 +284,6 @@
   /* ---- 小卡片 (1x1) 精簡排版 ---- */
   .card.is-small .event-title {
     font-size: 14px;
-    margin-bottom: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .card.is-small .big-time { gap: 8px; }
   .card.is-small .big-time .num { font-size: 36px; letter-spacing: -1px; }
@@ -293,8 +307,9 @@
   .card.is-small .status-label { margin-top: 10px; font-size: 11px; }
 
   @media (max-width: 600px) {
-    .card { padding: 36px 24px; }
-    .event-title { font-size: 16px; margin-bottom: 20px; }
+    .card { padding: 0 24px 36px; }
+    .card-title-row { padding: 0 24px; }
+    .event-title { font-size: 16px; }
     .big-time { gap: 10px; }
     .big-time .num { font-size: 48px; letter-spacing: -1px; }
     .big-time .unit { font-size: 16px; margin-right: 6px; }
@@ -310,9 +325,10 @@
     .modal { padding: 28px 20px; }
     .modal input { font-size: 15px; padding: 14px 12px; }
     .time-display { min-height: 96px; }
-    .card.is-small { padding: 20px 16px; min-height: 200px; }
+    .card.is-small { padding: 0 16px 20px; min-height: 200px; }
+    .card.is-small .card-title-row { padding: 0 16px; }
     .card.is-small .time-display { min-height: 78px; }
-    .card.is-small .event-title { font-size: 13px; margin-bottom: 8px; }
+    .card.is-small .event-title { font-size: 13px; }
     .card.is-small .big-time .num { font-size: 28px; }
     .card.is-small .small-time.is-main .seg { font-size: 24px; }
     .card.is-small .small-time.is-main .sep { font-size: 18px; }
@@ -555,6 +571,7 @@
     <div>
       <label>事件名稱</label>
       <input type="text" id="eventName" placeholder="例如：日本旅行">
+      <div class="field-error hide" id="eventNameError">事件名稱太長了，請輸入更簡短的名稱</div>
     </div>
     <div class="modal-row">
       <div>
@@ -626,6 +643,30 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+// ---- 事件名稱字數限制 ----
+// 中文、日文、韓文等全形字元視覺寬度約是英文字母的兩倍，
+// 所以全形字算 2 個單位、半形字（英數、符號）算 1 個單位，
+// 這樣不管標題是中文、英文還是混合，都能用同一套標準估算實際顯示寬度
+const CJK_REGEX = /[\u3000-\u303f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7a3\uff00-\uffef]/;
+const TITLE_LIMIT_LARGE = 28;
+const TITLE_LIMIT_SMALL = 10;
+
+function getWeightedLength(str) {
+  let total = 0;
+  for (const ch of str) {
+    total += CJK_REGEX.test(ch) ? 2 : 1;
+  }
+  return total;
+}
+
+function titleLimitForSize(size) {
+  return size === 'small' ? TITLE_LIMIT_SMALL : TITLE_LIMIT_LARGE;
+}
+
+function nameExceedsLimit(name, size) {
+  return getWeightedLength(name) > titleLimitForSize(size);
 }
 
 function parseDateInput(str) {
@@ -718,6 +759,7 @@ const eventCancelBtn = document.getElementById('eventCancel');
 const eventConfirmBtn = document.getElementById('eventConfirm');
 const eventDateError = document.getElementById('eventDateError');
 const eventTimeError = document.getElementById('eventTimeError');
+const eventNameError = document.getElementById('eventNameError');
 
 function renderEvents() {
   eventsContainer.innerHTML = '';
@@ -736,8 +778,10 @@ function renderEvents() {
           </svg>
         </button>
       </div>
-      <div class="card-content">
+      <div class="card-title-row">
         <div class="event-title">${escapeHtml(ev.name)}</div>
+      </div>
+      <div class="card-content">
         <div class="time-display">
           <div class="big-time" id="bigTime-${ev.id}">
             <span class="year-group hide" id="yearGroup-${ev.id}"><span class="num" id="years-${ev.id}">--</span><span class="unit">年</span></span>
@@ -1046,6 +1090,7 @@ function openAddModal() {
   eventDeleteBtn.classList.add('hide');
   eventDateError.classList.add('hide');
   eventTimeError.classList.add('hide');
+  eventNameError.classList.add('hide');
   originalColor = 'default';
   setSelectedColor('default');
   originalSize = 'large';
@@ -1064,6 +1109,7 @@ function openEditModal(id) {
   eventDeleteBtn.classList.remove('hide');
   eventDateError.classList.add('hide');
   eventTimeError.classList.add('hide');
+  eventNameError.classList.add('hide');
   originalColor = ev.color || 'default';
   setSelectedColor(originalColor);
   originalSize = ev.size || 'large';
@@ -1112,6 +1158,17 @@ function setSelectedSize(size) {
       cardEl.classList.toggle('is-small', size === 'small');
     }
   }
+
+  // 切換大小後，原本的名稱可能對新的卡片大小來說字數太多，要即時提示
+  const name = eventNameInput.value.trim();
+  if (name && nameExceedsLimit(name, size)) {
+    eventNameError.textContent = size === 'small'
+      ? '事件名稱太長了，小卡片裝不下，請縮短名稱或改選大卡片'
+      : '事件名稱太長了，請輸入更簡短的名稱';
+    eventNameError.classList.remove('hide');
+  } else {
+    eventNameError.classList.add('hide');
+  }
 }
 
 sizePicker.addEventListener('click', (e) => {
@@ -1144,11 +1201,18 @@ eventConfirmBtn.addEventListener('click', () => {
   const name = eventNameInput.value.trim();
   const dateOk = parseDateInput(eventDateInput.value) !== null;
   const timeOk = parseTimeInput(eventTimeInput.value) !== null;
+  const nameTooLong = !!name && nameExceedsLimit(name, selectedSize);
 
   eventDateError.classList.toggle('hide', dateOk);
   eventTimeError.classList.toggle('hide', timeOk);
+  if (nameTooLong) {
+    eventNameError.textContent = selectedSize === 'small'
+      ? '事件名稱太長了，小卡片裝不下，請縮短名稱或改選大卡片'
+      : '事件名稱太長了，請輸入更簡短的名稱';
+  }
+  eventNameError.classList.toggle('hide', !nameTooLong);
 
-  if (!name || !dateOk || !timeOk) return;
+  if (!name || !dateOk || !timeOk || nameTooLong) return;
 
   const target = buildDate(eventDateInput.value, eventTimeInput.value);
   if (!target) return;
