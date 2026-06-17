@@ -1151,18 +1151,22 @@ function setSelectedSize(size) {
     btn.classList.toggle('is-selected', btn.dataset.size === size);
   });
 
-  // 若是編輯既有事件，即時更新對應卡片的大小
+  const name = eventNameInput.value.trim();
+  const willOverflow = !!name && nameExceedsLimit(name, size);
+
+  // 若是編輯既有事件，即時更新對應卡片的大小──
+  // 但如果切換後名稱會超出新尺寸的字數上限，先不要真的套用外觀變化，
+  // 避免卡片在尚未確認儲存前，短暫出現標題跟設定鍵重疊的畫面
   if (editingId !== null) {
     const cardEl = document.getElementById(`card-${editingId}`);
-    if (cardEl) {
+    if (cardEl && !willOverflow) {
       cardEl.classList.toggle('is-large', size === 'large');
       cardEl.classList.toggle('is-small', size === 'small');
     }
   }
 
   // 切換大小後，原本的名稱可能對新的卡片大小來說字數太多，要即時提示
-  const name = eventNameInput.value.trim();
-  if (name && nameExceedsLimit(name, size)) {
+  if (willOverflow) {
     eventNameError.textContent = size === 'small'
       ? '事件名稱太長了，小卡片裝不下，請縮短名稱或改選大卡片'
       : '事件名稱太長了，請輸入更簡短的名稱';
