@@ -3,8 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Toki</title>
+<title>Tomosu</title>
+
+<!-- ---- 圖示設定 ----
+  之後把對應檔名的圖片放進跟這個html同一層的GitHub Page資料夾即可生效，不需要再改程式碼。
+  favicon.png   ：瀏覽器分頁標籤、書籤列表會用到的小圖示，建議至少32x32px
+  icon.png      ：iOS「加入主畫面」時顯示在手機桌面的圖示，建議180x180px、四角不要先做圓角（iOS會自動裁切）
+-->
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tomosu">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#232325">
+
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -16,7 +28,6 @@
     --text-primary: #f5f5f7;
     --text-secondary: rgba(245,245,247,0.6);
     --text-tertiary: rgba(245,245,247,0.4);
-    --text-quaternary: rgba(245,245,247,0.3);
     --control-bg: rgba(255,255,255,0.06);
     --control-bg-hover: rgba(255,255,255,0.12);
     --control-border: rgba(255,255,255,0.15);
@@ -39,7 +50,6 @@
       --text-primary: #1c1c1e;
       --text-secondary: rgba(28,28,30,0.55);
       --text-tertiary: rgba(28,28,30,0.38);
-      --text-quaternary: rgba(28,28,30,0.25);
       --control-bg: rgba(0,0,0,0.04);
       --control-bg-hover: rgba(0,0,0,0.08);
       --control-border: rgba(0,0,0,0.1);
@@ -62,7 +72,6 @@
     --text-primary: #1c1c1e;
     --text-secondary: rgba(28,28,30,0.55);
     --text-tertiary: rgba(28,28,30,0.38);
-    --text-quaternary: rgba(28,28,30,0.25);
     --control-bg: rgba(0,0,0,0.04);
     --control-bg-hover: rgba(0,0,0,0.08);
     --control-border: rgba(0,0,0,0.1);
@@ -76,35 +85,67 @@
     --button-primary-bg: rgba(0,0,0,0.1);
   }
 
-  /* ---- 卡片/視窗顏色（低飽和色系） ---- */
-  /* 深色模式下的色調（預設） */
-  [data-color="red"]    { --card-tint: rgba(200,108,108,0.28); --card-tint-border: rgba(224,140,140,0.32); }
-  [data-color="blue"]   { --card-tint: rgba(100,138,172,0.28); --card-tint-border: rgba(136,172,202,0.32); }
-  [data-color="orange"] { --card-tint: rgba(206,140,88,0.28);  --card-tint-border: rgba(226,168,118,0.32); }
-  [data-color="yellow"] { --card-tint: rgba(206,182,96,0.28);  --card-tint-border: rgba(226,204,134,0.32); }
+  /* ---- 卡片熄滅色調（低飽和，保留色彩識別但不發光） ---- */
+  [data-color="red"]    { --card-tint: rgba(201,127,127,0.22); --card-tint-border: rgba(201,127,127,0.32); --tint-solid: #c97f7f; }
+  [data-color="orange"] { --card-tint: rgba(207,156,110,0.22); --card-tint-border: rgba(207,156,110,0.32); --tint-solid: #cf9c6e; }
+  [data-color="yellow"] { --card-tint: rgba(205,187,126,0.22); --card-tint-border: rgba(205,187,126,0.32); --tint-solid: #cdbb7e; }
+  [data-color="blue"]   { --card-tint: rgba(141,163,189,0.22); --card-tint-border: rgba(141,163,189,0.32); --tint-solid: #8da3bd; }
 
-  /* 淺色模式下的色調（透過 prefers-color-scheme 或 data-theme="light" 套用） */
   @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) [data-color="red"]    { --card-tint: rgba(214,128,128,0.5); --card-tint-border: rgba(190,104,104,0.32); }
-    :root:not([data-theme="dark"]) [data-color="blue"]   { --card-tint: rgba(140,166,196,0.5); --card-tint-border: rgba(112,142,176,0.32); }
-    :root:not([data-theme="dark"]) [data-color="orange"] { --card-tint: rgba(224,172,116,0.5); --card-tint-border: rgba(200,142,90,0.32); }
-    :root:not([data-theme="dark"]) [data-color="yellow"] { --card-tint: rgba(224,200,118,0.5); --card-tint-border: rgba(202,176,90,0.32); }
+    :root:not([data-theme="dark"]) [data-color="red"]    { --card-tint: rgba(214,128,128,0.42); --card-tint-border: rgba(190,104,104,0.32); }
+    :root:not([data-theme="dark"]) [data-color="orange"] { --card-tint: rgba(224,172,116,0.42); --card-tint-border: rgba(200,142,90,0.32); }
+    :root:not([data-theme="dark"]) [data-color="yellow"] { --card-tint: rgba(224,200,118,0.42); --card-tint-border: rgba(202,176,90,0.32); }
+    :root:not([data-theme="dark"]) [data-color="blue"]   { --card-tint: rgba(140,166,196,0.42); --card-tint-border: rgba(112,142,176,0.32); }
   }
+  :root[data-theme="light"] [data-color="red"]    { --card-tint: rgba(214,128,128,0.42); --card-tint-border: rgba(190,104,104,0.32); }
+  :root[data-theme="light"] [data-color="orange"] { --card-tint: rgba(224,172,116,0.42); --card-tint-border: rgba(200,142,90,0.32); }
+  :root[data-theme="light"] [data-color="yellow"] { --card-tint: rgba(224,200,118,0.42); --card-tint-border: rgba(202,176,90,0.32); }
+  :root[data-theme="light"] [data-color="blue"]   { --card-tint: rgba(140,166,196,0.42); --card-tint-border: rgba(112,142,176,0.32); }
 
-  :root[data-theme="light"] [data-color="red"]    { --card-tint: rgba(214,128,128,0.5); --card-tint-border: rgba(190,104,104,0.32); }
-  :root[data-theme="light"] [data-color="blue"]   { --card-tint: rgba(140,166,196,0.5); --card-tint-border: rgba(112,142,176,0.32); }
-  :root[data-theme="light"] [data-color="orange"] { --card-tint: rgba(224,172,116,0.5); --card-tint-border: rgba(200,142,90,0.32); }
-  :root[data-theme="light"] [data-color="yellow"] { --card-tint: rgba(224,200,118,0.5); --card-tint-border: rgba(202,176,90,0.32); }
-
-  /* 將色調疊加在原本的玻璃底色上，維持高光與透明度 */
-  .card[data-color]:not([data-color="default"]) {
+  /* 熄滅：色調疊加在玻璃底色上，維持高光與透明度 */
+  .card[data-color] {
     background: linear-gradient(var(--card-tint), var(--card-tint)), var(--card-bg);
     border-color: var(--card-tint-border);
   }
-  .modal[data-color]:not([data-color="default"]) {
+  .modal[data-color] {
     background: linear-gradient(var(--card-tint), var(--card-tint)), var(--modal-bg);
     border-color: var(--card-tint-border);
     transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  /* 點亮疊色濃度與暈影強度：深色模式下的預設值 */
+  [data-color="red"]    { --lit-tint: rgba(201,127,127,0.55); --lit-glow: rgba(201,127,127,0.32); }
+  [data-color="orange"] { --lit-tint: rgba(207,156,110,0.55); --lit-glow: rgba(207,156,110,0.32); }
+  [data-color="yellow"] { --lit-tint: rgba(205,187,126,0.55); --lit-glow: rgba(205,187,126,0.32); }
+  [data-color="blue"]   { --lit-tint: rgba(141,163,189,0.55); --lit-glow: rgba(141,163,189,0.32); }
+
+  /* 淺色模式：不透明度只比深色模式略高，留住底層玻璃的白霧透光感，
+     對比則靠暈影擴散範圍加大來補，而不是用顏色完全蓋掉玻璃感 */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) [data-color="red"]    { --lit-tint: rgba(196,90,90,0.62); --lit-glow: rgba(196,90,90,0.45); }
+    :root:not([data-theme="dark"]) [data-color="orange"] { --lit-tint: rgba(204,132,70,0.62); --lit-glow: rgba(204,132,70,0.45); }
+    :root:not([data-theme="dark"]) [data-color="yellow"] { --lit-tint: rgba(198,168,70,0.62); --lit-glow: rgba(198,168,70,0.45); }
+    :root:not([data-theme="dark"]) [data-color="blue"]   { --lit-tint: rgba(96,128,168,0.62); --lit-glow: rgba(96,128,168,0.45); }
+  }
+  :root[data-theme="light"] [data-color="red"]    { --lit-tint: rgba(196,90,90,0.62); --lit-glow: rgba(196,90,90,0.45); }
+  :root[data-theme="light"] [data-color="orange"] { --lit-tint: rgba(204,132,70,0.62); --lit-glow: rgba(204,132,70,0.45); }
+  :root[data-theme="light"] [data-color="yellow"] { --lit-tint: rgba(198,168,70,0.62); --lit-glow: rgba(198,168,70,0.45); }
+  :root[data-theme="light"] [data-color="blue"]   { --lit-tint: rgba(96,128,168,0.62); --lit-glow: rgba(96,128,168,0.45); }
+
+  /* 點亮：卡片本體飽和度提升、邊框轉為實色，外圍補上一圈柔和的暈影；
+     淺色模式的暈影擴散半徑略放大，補足玻璃透光後對比變弱的部分 */
+  .card.is-lit[data-color] {
+    background: linear-gradient(var(--lit-tint), var(--lit-tint)), var(--card-bg);
+    border-color: var(--tint-solid);
+    box-shadow: var(--card-shadow), 0 0 14px 1px var(--lit-glow);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .card.is-lit[data-color] {
+      box-shadow: var(--card-shadow), 0 0 20px 2px var(--lit-glow);
+    }
+  }
+  :root[data-theme="light"] .card.is-lit[data-color] {
+    box-shadow: var(--card-shadow), 0 0 20px 2px var(--lit-glow);
   }
 
   html {
@@ -122,10 +163,7 @@
     padding: 40px 16px;
   }
 
-  .page {
-    width: 100%;
-    max-width: 560px;
-  }
+  .page { width: 100%; max-width: 560px; }
 
   .page-header {
     display: flex;
@@ -133,38 +171,32 @@
     margin-bottom: 24px;
   }
 
-  .events {
+  .habits {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 24px;
   }
 
+  /* ---- 卡片本體：液態玻璃 ---- */
   .card {
     position: relative;
     width: 100%;
-    background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 32px;
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
-    padding: 0 40px 48px;
     box-shadow: var(--card-shadow);
-    transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
     display: flex;
     flex-direction: column;
+    cursor: pointer;
+    user-select: none;
   }
+  .card:active { transform: scale(0.97); }
 
-  .card.is-large {
-    grid-column: 1 / -1;
-    min-height: 280px;
-  }
-
-  .card.is-small {
-    grid-column: span 1;
-    min-height: 232px;
-    padding: 0 20px 28px;
-  }
+  .card.is-large { grid-column: 1 / -1; min-height: 220px; }
+  .card.is-small { grid-column: span 1; min-height: 180px; }
 
   .card-header {
     position: absolute;
@@ -172,8 +204,25 @@
     right: 20px;
     z-index: 1;
   }
-  .card.is-small .card-header {
-    right: 14px;
+  .card.is-small .card-header { right: 14px; }
+
+  .card-edit-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--control-border);
+    background: var(--control-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .card-edit-btn:hover { background: var(--control-bg-hover); }
+  .card-edit-btn svg { width: 14px; height: 14px; }
+  .card-edit-btn circle {
+    stroke: var(--icon-stroke);
+    stroke-width: 1.8;
+    fill: var(--icon-stroke);
   }
 
   .card-title-row {
@@ -188,193 +237,66 @@
     padding: 0 40px;
     pointer-events: none;
   }
-  .card.is-small .card-title-row {
-    padding: 0 20px;
-  }
+  .card.is-small .card-title-row { padding: 0 20px; }
 
-  .card-content {
-    flex: 1;
+  .card-body {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
-    min-height: 0;
-    padding-top: 76px;
-    padding-bottom: 28px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 24px;
   }
-  .card.is-small .card-content {
-    padding-bottom: 20px;
-  }
+  .card.is-small .card-body { padding: 0 16px; }
 
-  .event-title {
-    text-align: center;
-    font-size: 18px;
+  .habit-name {
+    font-size: 16px;
     font-weight: 500;
+    text-align: center;
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 100%;
   }
+  .card.is-small .habit-name { font-size: 14px; }
 
-  .time-display {
-    flex: 1;
+  .habit-days-row {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 140px;
-    padding-bottom: 16px;
-  }
-  .card.is-small .time-display {
-    min-height: 90px;
-  }
-
-  .big-time {
-    display: flex;
+    width: 100%;
     align-items: baseline;
     justify-content: center;
-    gap: 16px;
-    font-weight: 600;
-  }
-  .big-time .num { font-size: 72px; letter-spacing: -2px; }
-  .big-time .unit { font-size: 20px; color: var(--text-secondary); font-weight: 400; margin-right: 8px; }
-  .big-time .year-group .unit,
-  .big-time .day-group .unit { margin-right: 0; }
-  .big-time .year-group,
-  .big-time .day-group {
-    display: flex;
-    align-items: baseline;
     gap: 8px;
+    margin-top: 4px;
   }
-  .big-time .hide { display: none; }
-  .big-time.empty { display: none; }
+  .habit-days { font-size: 56px; font-weight: 600; letter-spacing: -1px; color: var(--text-primary); }
+  .card.is-small .habit-days { font-size: 36px; }
+  .habit-unit { font-size: 15px; color: var(--text-secondary); }
+  .card.is-small .habit-unit { font-size: 13px; }
 
-  .small-time {
+  /* ---- 拖曳把手 ---- */
+  .drag-handle {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
     display: flex;
-    align-items: baseline;
     justify-content: center;
-    gap: 6px;
-    margin-top: 14px;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
+    padding: 6px;
+    cursor: grab;
+    touch-action: none;
+    z-index: 1;
   }
-  .small-time.hide { display: none; }
-  .small-time .hour-group {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-  }
-  .small-time .hour-group.hide { display: none; }
-  .small-time.is-main {
-    margin-top: 0;
-  }
-  .small-time.is-main .seg { font-size: 56px; font-weight: 600; color: var(--text-primary); }
-  .small-time.is-main .ms { font-size: 28px; min-width: 60px; color: var(--text-secondary); }
-  .small-time.is-main .sep { font-size: 40px; }
-  .small-time .seg { font-size: 28px; font-weight: 500; }
-  .small-time .ms { font-size: 19px; font-weight: 400; min-width: 40px; text-align: left; color: var(--text-tertiary); }
-  .small-time .sep { font-size: 20px; color: var(--text-quaternary); }
-
-  .status-label {
-    text-align: center;
-    font-size: 13px;
-    font-style: italic;
-    color: var(--text-tertiary);
-    margin-top: 24px;
-    line-height: 1.6;
-  }
-
-  /* ---- 小卡片 (1x1) 精簡排版 ---- */
-  .card.is-small .event-title {
-    font-size: 14px;
-  }
-  .card.is-small .big-time { gap: 8px; }
-  .card.is-small .big-time .num { font-size: 36px; letter-spacing: -1px; }
-  .card.is-small .big-time .unit { font-size: 14px; margin-right: 4px; }
-  .card.is-small .big-time .year-group,
-  .card.is-small .big-time .day-group { gap: 4px; }
-  .card.is-small .small-time { gap: 4px; margin-top: 6px; }
-  .card.is-small .small-time .hour-group { gap: 4px; }
-  .card.is-small .small-time.is-main { margin-top: 0; }
-  .card.is-small .small-time.is-main .seg { font-size: 30px; }
-  .card.is-small .small-time.is-main .sep { font-size: 22px; }
-  .card.is-small .small-time.is-main .ms { font-size: 15px; min-width: 32px; }
-  .card.is-small .small-time .seg { font-size: 16px; }
-  .card.is-small .small-time .sep { font-size: 13px; }
-  /* 小卡片預設不顯示毫秒、不顯示狀態文字、不顯示拖曳把手提示文字；
-     只有在沒有顯示小時（倒數已不到 1 小時）時才補上千分之一秒 */
-  .card.is-small .small-time .ms { display: none; }
-  .card.is-small .small-time .ms-sep { display: none; }
-  .card.is-small .small-time.show-ms .ms { display: inline; }
-  .card.is-small .small-time.show-ms .ms-sep { display: inline; }
-  .card.is-small .status-label { margin-top: 10px; font-size: 11px; }
-
-  @media (max-width: 600px) {
-    .card { padding: 0 24px 36px; }
-    .card-title-row { padding: 0 24px; }
-    .event-title { font-size: 16px; }
-    .big-time { gap: 10px; }
-    .big-time .num { font-size: 48px; letter-spacing: -1px; }
-    .big-time .unit { font-size: 16px; margin-right: 6px; }
-    .small-time { gap: 4px; margin-top: 10px; }
-    .small-time.is-main { margin-top: 0; }
-    .small-time.is-main .seg { font-size: 38px; }
-    .small-time.is-main .ms { font-size: 20px; min-width: 44px; }
-    .small-time.is-main .sep { font-size: 28px; }
-    .small-time .seg { font-size: 22px; }
-    .small-time .ms { font-size: 15px; min-width: 32px; }
-    .small-time .sep { font-size: 16px; }
-    .status-label { font-size: 12px; margin-top: 18px; }
-    .modal { padding: 28px 20px; }
-    .modal input { font-size: 15px; padding: 14px 12px; }
-    .time-display { min-height: 96px; }
-    .card.is-small { padding: 0 16px 20px; min-height: 200px; }
-    .card.is-small .card-title-row { padding: 0 16px; }
-    .card.is-small .time-display { min-height: 78px; }
-    .card.is-small .event-title { font-size: 13px; }
-    .card.is-small .big-time .num { font-size: 28px; }
-    .card.is-small .small-time.is-main .seg { font-size: 24px; }
-    .card.is-small .small-time.is-main .sep { font-size: 18px; }
-    .card.is-small .small-time .seg { font-size: 14px; }
-  }
-
-  .add-card {
-    grid-column: 1 / -1;
-    border: 1px dashed var(--card-border);
-    background: transparent;
-    box-shadow: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 180px;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .add-card:hover { border-color: var(--control-border); color: var(--text-secondary); }
-  .add-card .add-icon { font-size: 32px; font-weight: 400; line-height: 1; }
-  .add-card .add-label { font-size: 14px; }
-
-  .glass-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid var(--control-border);
-    background: var(--control-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
-  }
-  .glass-btn:hover { background: var(--control-bg-hover); }
-  .glass-btn svg { width: 18px; height: 18px; }
-  .glass-btn path, .glass-btn circle, .glass-btn line {
-    stroke: var(--icon-stroke);
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    fill: none;
-  }
+  .drag-handle svg { width: 24px; height: 12px; }
+  .drag-handle circle { fill: var(--text-tertiary); transition: fill 0.2s; }
+  .drag-handle:hover circle { fill: var(--text-secondary); }
+  .card.dragging .drag-handle { cursor: grabbing; }
+  .card.dragging .drag-handle circle { fill: var(--text-secondary); }
 
   .card.dragging {
     position: fixed;
@@ -398,28 +320,53 @@
     pointer-events: none;
   }
 
-  .drag-handle {
-    position: absolute;
-    left: 50%;
-    bottom: 12px;
-    transform: translateX(-50%);
+  .glass-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--control-border);
+    background: var(--control-bg);
     display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 6px;
-    cursor: grab;
-    touch-action: none;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
   }
-  .drag-handle svg { width: 28px; height: 14px; }
-  .drag-handle circle { fill: var(--text-tertiary); transition: fill 0.2s; }
-  .drag-handle:hover circle { fill: var(--text-secondary); }
-  .card.dragging .drag-handle { cursor: grabbing; }
-  .card.dragging .drag-handle circle { fill: var(--text-secondary); }
+  .glass-btn:hover { background: var(--control-bg-hover); }
+  .glass-btn svg { width: 18px; height: 18px; }
+  .glass-btn path, .glass-btn circle, .glass-btn line {
+    stroke: var(--icon-stroke);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    fill: none;
+  }
 
   .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
   .theme-toggle.is-light .icon-sun { display: block; }
   .theme-toggle:not(.is-light) .icon-moon { display: block; }
 
-  /* modal */
+  /* ---- 新增卡片按鈕：跟卡片同一套圓角語言，但用虛線標示「尚未存在」 ---- */
+  .add-card {
+    grid-column: 1 / -1;
+    border: 1px dashed var(--card-border);
+    border-radius: 32px;
+    background: transparent;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 120px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .add-card:hover { border-color: var(--control-border); color: var(--text-secondary); }
+  .add-card .add-icon { font-size: 30px; font-weight: 400; line-height: 1; }
+  .add-card .add-label { font-size: 14px; }
+
+  /* ---- modal ---- */
   .overlay {
     position: fixed;
     inset: 0;
@@ -435,93 +382,53 @@
     position: relative;
     transform: translateZ(0);
     width: calc(100% - 80px);
-    max-width: 440px;
-    background: var(--modal-bg);
+    max-width: 420px;
     border: 1px solid var(--modal-border);
     border-radius: 24px;
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
-    padding: 40px;
+    padding: 36px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
+    background: var(--modal-bg);
   }
-  .modal h3 { font-size: 20px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
-  .modal label { font-size: 15px; color: var(--text-secondary); }
+  .modal h3 { font-size: 19px; font-weight: 500; color: var(--text-primary); }
+  .modal label { font-size: 14px; color: var(--text-secondary); }
   .modal input {
     width: 100%;
     background: var(--input-bg);
     border: 1px solid var(--input-border);
     border-radius: 12px;
-    padding: 14px 16px;
-    color: var(--text-primary);
-    font-size: 17px;
-    outline: none;
-    margin-top: 8px;
-    -webkit-appearance: none;
-    appearance: none;
-    box-sizing: border-box;
-  }
-  .modal-row { display: flex; gap: 12px; }
-  .modal-row > div { flex: 1; }
-  .field-error {
-    font-size: 12px;
-    color: #d98a8a;
-    margin-top: 6px;
-    line-height: 1.4;
-  }
-  .field-error.hide { display: none; }
-  .modal-buttons { display: flex; gap: 12px; margin-top: 8px; }
-  .modal-buttons button {
-    flex: 1;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid var(--button-border);
-    background: var(--button-bg);
+    padding: 13px 14px;
     color: var(--text-primary);
     font-size: 16px;
-    cursor: pointer;
+    outline: none;
+    margin-top: 6px;
+    -webkit-appearance: none;
+    appearance: none;
   }
-  .modal-buttons button.primary {
-    background: var(--button-primary-bg);
-    font-weight: 500;
-  }
-  .modal-buttons button.hide { display: none; }
+  .field-error { font-size: 12px; color: #d98a8a; margin-top: 6px; line-height: 1.4; }
+  .field-error.hide { display: none; }
 
-  /* 顏色選擇器 */
-  .color-picker {
-    display: flex;
-    gap: 12px;
-    margin-top: 10px;
-    flex-wrap: wrap;
-  }
+  .color-picker { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
   .color-swatch {
-    width: 32px;
-    height: 32px;
+    width: 32px; height: 32px;
     border-radius: 50%;
     border: 2px solid transparent;
     cursor: pointer;
     padding: 0;
-    background: var(--swatch-bg, var(--control-bg));
     box-shadow: inset 0 0 0 1px var(--control-border);
     transition: transform 0.15s ease, border-color 0.15s ease;
   }
   .color-swatch:hover { transform: scale(1.08); }
-  .color-swatch.is-selected {
-    border-color: var(--text-primary);
-  }
-  .color-swatch[data-color="default"] { --swatch-bg: var(--card-bg); }
-  .color-swatch[data-color="red"]    { --swatch-bg: #c97f7f; }
-  .color-swatch[data-color="orange"] { --swatch-bg: #cf9c6e; }
-  .color-swatch[data-color="yellow"] { --swatch-bg: #cdbb7e; }
-  .color-swatch[data-color="blue"]   { --swatch-bg: #8da3bd; }
+  .color-swatch.is-selected { border-color: var(--text-primary); }
+  .color-swatch[data-color="red"]    { background: #c97f7f; }
+  .color-swatch[data-color="orange"] { background: #cf9c6e; }
+  .color-swatch[data-color="yellow"] { background: #cdbb7e; }
+  .color-swatch[data-color="blue"]   { background: #8da3bd; }
 
-  /* 大小選擇器 */
-  .size-picker {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-  }
+  .size-picker { display: flex; gap: 10px; margin-top: 8px; }
   .size-swatch {
     padding: 10px 22px;
     border-radius: 12px;
@@ -538,6 +445,27 @@
     color: var(--text-primary);
     font-weight: 500;
     border-color: var(--text-primary);
+  }
+
+  .modal-buttons { display: flex; gap: 12px; margin-top: 6px; }
+  .modal-buttons button {
+    flex: 1;
+    padding: 13px;
+    border-radius: 12px;
+    border: 1px solid var(--button-border);
+    background: var(--button-bg);
+    color: var(--text-primary);
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .modal-buttons button.primary { background: var(--button-primary-bg); font-weight: 500; }
+  .modal-buttons button.hide { display: none; }
+
+  @media (max-width: 600px) {
+    .card-body { padding: 0 18px; }
+    .habit-days { font-size: 44px; }
+    .card.is-small .habit-days { font-size: 30px; }
+    .modal { padding: 28px 22px; }
   }
 </style>
 </head>
@@ -563,37 +491,24 @@
     </button>
   </div>
 
-  <div class="events" id="eventsContainer"></div>
+  <div class="habits" id="habitsContainer"></div>
 </div>
 
-<div class="overlay hide" id="eventOverlay">
-  <div class="modal">
-    <h3 id="eventModalTitle">新增事件</h3>
+<div class="overlay hide" id="habitOverlay">
+  <div class="modal" id="habitModal">
+    <h3 id="modalTitle">新增習慣</h3>
     <div>
-      <label>事件名稱</label>
-      <input type="text" id="eventName" placeholder="例如：日本旅行">
-      <div class="field-error hide" id="eventNameError">事件名稱太長了，請輸入更簡短的名稱</div>
-    </div>
-    <div class="modal-row">
-      <div>
-        <label>目標日期</label>
-        <input type="text" id="eventDate" placeholder="年/月/日">
-        <div class="field-error hide" id="eventDateError">請輸入正確的日期格式，例如：2022/12/28</div>
-      </div>
-      <div>
-        <label>時間（選填）</label>
-        <input type="text" id="eventTime" placeholder="時:分">
-        <div class="field-error hide" id="eventTimeError">請輸入正確的時間格式，例如：12:28</div>
-      </div>
+      <label>習慣名稱</label>
+      <input type="text" id="habitNameInput" placeholder="例如：喝水、運動、閱讀">
+      <div class="field-error hide" id="nameError">名稱太長了，請縮短一些</div>
     </div>
     <div>
       <label>卡片顏色</label>
       <div class="color-picker" id="colorPicker">
-        <button type="button" class="color-swatch is-selected" data-color="default" aria-label="預設顏色" title="預設"></button>
-        <button type="button" class="color-swatch" data-color="red" aria-label="紅色" title="紅"></button>
-        <button type="button" class="color-swatch" data-color="orange" aria-label="橘色" title="橘"></button>
-        <button type="button" class="color-swatch" data-color="yellow" aria-label="黃色" title="黃"></button>
-        <button type="button" class="color-swatch" data-color="blue" aria-label="藍色" title="藍"></button>
+        <button type="button" class="color-swatch is-selected" data-color="red"></button>
+        <button type="button" class="color-swatch" data-color="orange"></button>
+        <button type="button" class="color-swatch" data-color="yellow"></button>
+        <button type="button" class="color-swatch" data-color="blue"></button>
       </div>
     </div>
     <div>
@@ -603,41 +518,42 @@
         <button type="button" class="size-swatch" data-size="small">小</button>
       </div>
     </div>
+    <div>
+      <label>基礎天數</label>
+      <input type="number" id="baseDaysInput" placeholder="0">
+      <div class="field-error hide" id="baseDaysError">基礎天數過多，請輸入小一點的數字</div>
+    </div>
     <div class="modal-buttons">
-      <button id="eventDelete" class="hide">刪除</button>
-      <button id="eventCancel">取消</button>
-      <button class="primary" id="eventConfirm">儲存</button>
+      <button id="deleteBtn" class="hide">刪除</button>
+      <button id="cancelBtn">取消</button>
+      <button id="confirmBtn" class="primary">儲存</button>
     </div>
   </div>
 </div>
 
 <script>
-const EVENTS_KEY = 'countdown-events';
-const THEME_KEY = 'countdown-theme';
+const STORAGE_KEY = 'tomosu_habits_v1';
+const THEME_KEY = 'tomosu_theme_v1';
+const MAX_TOTAL_DAYS = 99999;
 
-let events = [];
-let editingId = null;
-let selectedColor = 'default';
-let originalColor = 'default';
-let selectedSize = 'large';
-let originalSize = 'large';
+function loadHabits() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch (e) { return []; }
+}
 
-// ---- 隨機 placeholder 例句 ----
-const NAME_PLACEHOLDERS = [
-  '例如：旅行',
-  '例如：紀念日',
-  '例如：生日',
-  '例如：畢業典禮',
-  '例如：搬新家',
-  '例如：演唱會',
-  '例如：考試結束',
-  '例如：跟朋友的聚餐',
-  '例如：遊戲發行日',
-  '例如：期待的展覽'
-];
+function saveHabits() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(habits)); } catch (e) {}
+}
 
-function getRandomPlaceholder() {
-  return NAME_PLACEHOLDERS[Math.floor(Math.random() * NAME_PLACEHOLDERS.length)];
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 function escapeHtml(str) {
@@ -646,156 +562,69 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// ---- 事件名稱字數限制 ----
-// 中文、日文、韓文等全形字元視覺寬度約是英文字母的兩倍，
-// 所以全形字算 2 個單位、半形字（英數、符號）算 1 個單位，
-// 這樣不管標題是中文、英文還是混合，都能用同一套標準估算實際顯示寬度
+// ---- 名稱字數限制：全形字算2單位、半形字算1單位，避免長標題撐爆卡片 ----
 const CJK_REGEX = /[\u3000-\u303f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7a3\uff00-\uffef]/;
-const TITLE_LIMIT_LARGE = 28;
-const TITLE_LIMIT_SMALL = 10;
+const NAME_LIMIT_LARGE = 16;
+const NAME_LIMIT_SMALL = 8;
 
 function getWeightedLength(str) {
   let total = 0;
-  for (const ch of str) {
-    total += CJK_REGEX.test(ch) ? 2 : 1;
-  }
+  for (const ch of str) total += CJK_REGEX.test(ch) ? 2 : 1;
   return total;
 }
+function nameLimitForSize(size) { return size === 'small' ? NAME_LIMIT_SMALL : NAME_LIMIT_LARGE; }
+function nameExceedsLimit(name, size) { return getWeightedLength(name) > nameLimitForSize(size); }
 
-function titleLimitForSize(size) {
-  return size === 'small' ? TITLE_LIMIT_SMALL : TITLE_LIMIT_LARGE;
-}
+let habits = loadHabits();
+// 資料補齊：舊資料若沒有 size 欄位，預設為 large
+habits.forEach(h => { if (!h.size) h.size = 'large'; });
 
-function nameExceedsLimit(name, size) {
-  return getWeightedLength(name) > titleLimitForSize(size);
-}
+let editingId = null;
+let selectedColor = 'red';
+let selectedSize = 'large';
+let originalColor = 'red';
+let originalSize = 'large';
 
-function parseDateInput(str) {
-  if (!str) return null;
-  const m = str.trim().match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
-  if (!m) return null;
-  const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
-  if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
-  return { y, mo, d };
-}
+const habitsContainer = document.getElementById('habitsContainer');
+const overlay = document.getElementById('habitOverlay');
+const habitModal = document.getElementById('habitModal');
+const modalTitle = document.getElementById('modalTitle');
+const nameInput = document.getElementById('habitNameInput');
+const nameError = document.getElementById('nameError');
+const baseDaysInput = document.getElementById('baseDaysInput');
+const baseDaysError = document.getElementById('baseDaysError');
+const colorPicker = document.getElementById('colorPicker');
+const sizePicker = document.getElementById('sizePicker');
+const deleteBtn = document.getElementById('deleteBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+const confirmBtn = document.getElementById('confirmBtn');
 
-function parseTimeInput(str) {
-  if (!str || !str.trim()) return { h: 0, mi: 0 };
-  const m = str.trim().match(/^(\d{1,2}):(\d{2})$/);
-  if (!m) return null;
-  const h = Number(m[1]), mi = Number(m[2]);
-  if (h > 23 || mi > 59) return null;
-  return { h, mi };
-}
+function renderHabits() {
+  const today = todayStr();
+  habitsContainer.innerHTML = '';
 
-function buildDate(dateStr, timeStr) {
-  const d = parseDateInput(dateStr);
-  if (!d) return null;
-  const t = parseTimeInput(timeStr);
-  if (!t) return null;
-  const date = new Date(d.y, d.mo - 1, d.d, t.h, t.mi, 0, 0);
-  return isNaN(date.getTime()) ? null : date;
-}
-
-function formatDateForInput(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}/${m}/${d}`;
-}
-
-function formatTimeForInput(date) {
-  const h = String(date.getHours()).padStart(2, '0');
-  const mi = String(date.getMinutes()).padStart(2, '0');
-  return `${h}:${mi}`;
-}
-
-function autoFormatDate(e) {
-  const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
-  let formatted = digits;
-  if (digits.length > 4) formatted = digits.slice(0, 4) + '/' + digits.slice(4);
-  if (digits.length > 6) formatted = digits.slice(0, 4) + '/' + digits.slice(4, 6) + '/' + digits.slice(6);
-  e.target.value = formatted;
-}
-
-function autoFormatTime(e) {
-  const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
-  let formatted = digits;
-  if (digits.length > 2) formatted = digits.slice(0, 2) + ':' + digits.slice(2);
-  e.target.value = formatted;
-}
-
-const eventNameInput = document.getElementById('eventName');
-const eventDateInput = document.getElementById('eventDate');
-const eventTimeInput = document.getElementById('eventTime');
-eventDateInput.addEventListener('input', autoFormatDate);
-eventTimeInput.addEventListener('input', autoFormatTime);
-
-// ---- 讀取/寫入本地記憶 ----
-function saveEvents() {
-  try {
-    localStorage.setItem(EVENTS_KEY, JSON.stringify(
-      events.map(e => ({ id: e.id, name: e.name, target: e.target.getTime(), color: e.color || 'default', size: e.size || 'large' }))
-    ));
-  } catch (e) {}
-}
-
-function loadEvents() {
-  try {
-    const raw = localStorage.getItem(EVENTS_KEY);
-    if (!raw) return [];
-    const data = JSON.parse(raw);
-    return data
-      .map(e => ({ id: e.id, name: e.name, target: new Date(e.target), color: e.color || 'default', size: e.size || 'large' }))
-      .filter(e => !isNaN(e.target.getTime()));
-  } catch (e) { return []; }
-}
-
-// ---- 事件卡片渲染 ----
-const eventsContainer = document.getElementById('eventsContainer');
-const eventOverlay = document.getElementById('eventOverlay');
-const eventModalTitle = document.getElementById('eventModalTitle');
-const eventDeleteBtn = document.getElementById('eventDelete');
-const eventCancelBtn = document.getElementById('eventCancel');
-const eventConfirmBtn = document.getElementById('eventConfirm');
-const eventDateError = document.getElementById('eventDateError');
-const eventTimeError = document.getElementById('eventTimeError');
-const eventNameError = document.getElementById('eventNameError');
-
-function renderEvents() {
-  eventsContainer.innerHTML = '';
-
-  events.forEach(ev => {
+  habits.forEach(habit => {
+    const isLit = habit.dates.includes(today);
+    const totalDays = (habit.baseDays || 0) + habit.dates.length;
     const card = document.createElement('div');
-    card.className = `card ${ev.size === 'small' ? 'is-small' : 'is-large'}`;
-    card.id = `card-${ev.id}`;
-    card.dataset.color = ev.color || 'default';
+    card.className = `card ${habit.size === 'small' ? 'is-small' : 'is-large'}` + (isLit ? ' is-lit' : '');
+    card.dataset.color = habit.color;
+    card.dataset.id = habit.id;
+    card.id = `card-${habit.id}`;
     card.innerHTML = `
       <div class="card-header">
-        <button class="glass-btn settings-btn" aria-label="設定" title="設定">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="3.2"></circle>
-            <path d="M 9.86 2.74 L 14.14 2.74 L 13.62 4.98 L 15.82 5.89 L 17.03 3.94 L 20.06 6.97 L 18.11 8.18 L 19.02 10.38 L 21.26 9.86 L 21.26 14.14 L 19.02 13.62 L 18.11 15.82 L 20.06 17.03 L 17.03 20.06 L 15.82 18.11 L 13.62 19.02 L 14.14 21.26 L 9.86 21.26 L 10.38 19.02 L 8.18 18.11 L 6.97 20.06 L 3.94 17.03 L 5.89 15.82 L 4.98 13.62 L 2.74 14.14 L 2.74 9.86 L 4.98 10.38 L 5.89 8.18 L 3.94 6.97 L 6.97 3.94 L 8.18 5.89 L 10.38 4.98 Z" stroke-linejoin="round"></path>
-          </svg>
-        </button>
+        <div class="card-edit-btn" data-edit-id="${habit.id}">
+          <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>
+        </div>
       </div>
       <div class="card-title-row">
-        <div class="event-title">${escapeHtml(ev.name)}</div>
+        <div class="habit-name">${escapeHtml(habit.name)}</div>
       </div>
-      <div class="card-content">
-        <div class="time-display">
-          <div class="big-time" id="bigTime-${ev.id}">
-            <span class="year-group hide" id="yearGroup-${ev.id}"><span class="num" id="years-${ev.id}">--</span><span class="unit">年</span></span>
-            <span class="day-group hide" id="dayGroup-${ev.id}"><span class="num" id="days-${ev.id}">--</span><span class="unit">天</span></span>
-          </div>
-          <div class="small-time" id="smallTime-${ev.id}">
-            <span class="hour-group" id="hourGroup-${ev.id}"><span class="seg" id="hours-${ev.id}">--</span><span class="sep">:</span></span>
-            <span class="seg" id="minutes-${ev.id}">--</span><span class="sep">:</span>
-            <span class="seg" id="seconds-${ev.id}">--</span><span class="sep ms-sep">:</span>
-            <span class="ms" id="ms-${ev.id}">---</span>
-          </div>
+      <div class="card-body">
+        <div class="habit-days-row">
+          <span class="habit-days">${totalDays}</span>
+          <span class="habit-unit">天</span>
         </div>
-        <div class="status-label" id="status-${ev.id}">倒數中</div>
       </div>
       <div class="drag-handle" title="拖曳排序">
         <svg viewBox="0 0 24 12" xmlns="http://www.w3.org/2000/svg">
@@ -808,19 +637,189 @@ function renderEvents() {
         </svg>
       </div>
     `;
-    card.querySelector('.settings-btn').addEventListener('click', () => openEditModal(ev.id));
-    attachDragHandlers(card, ev.id);
-    eventsContainer.appendChild(card);
+    habitsContainer.appendChild(card);
+    attachDragHandlers(card, habit.id);
   });
 
   const addCard = document.createElement('div');
-  addCard.className = 'card add-card';
-  addCard.innerHTML = `<span class="add-icon">+</span><span class="add-label">新增一個倒數</span>`;
-  addCard.addEventListener('click', openAddModal);
-  eventsContainer.appendChild(addCard);
+  addCard.className = 'add-card';
+  addCard.id = 'addHabitBtn';
+  addCard.innerHTML = `<span class="add-icon">+</span><span class="add-label">新增習慣</span>`;
+  habitsContainer.appendChild(addCard);
 }
 
-// ---- 拖曳把手排序（即時擠開，類似 iOS 排列 icon / widget）----
+// ---- 卡片本體點擊：點亮/熄滅。把手與編輯鈕各自攔截，不會誤觸 ----
+habitsContainer.addEventListener('click', (e) => {
+  if (e.target.closest('.drag-handle')) return;
+
+  const editBtn = e.target.closest('.card-edit-btn');
+  if (editBtn) { openEditModal(Number(editBtn.dataset.editId)); return; }
+
+  const addBtn = e.target.closest('#addHabitBtn');
+  if (addBtn) { openAddModal(); return; }
+
+  const card = e.target.closest('.card');
+  if (!card || card.classList.contains('dragging')) return;
+
+  const id = Number(card.dataset.id);
+  const habit = habits.find(h => h.id === id);
+  if (!habit) return;
+
+  const today = todayStr();
+  const idx = habit.dates.indexOf(today);
+  if (idx === -1) {
+    const wouldBeTotal = (habit.baseDays || 0) + habit.dates.length + 1;
+    if (wouldBeTotal > MAX_TOTAL_DAYS) return;
+    habit.dates.push(today);
+  } else {
+    habit.dates.splice(idx, 1);
+  }
+
+  saveHabits();
+  renderHabits();
+});
+
+// ---- modal ----
+function openAddModal() {
+  editingId = null;
+  modalTitle.textContent = '新增習慣';
+  nameInput.value = '';
+  baseDaysInput.value = '';
+  nameError.classList.add('hide');
+  baseDaysError.classList.add('hide');
+  setSelectedColor('red');
+  setSelectedSize('large');
+  deleteBtn.classList.add('hide');
+  overlay.classList.remove('hide');
+  nameInput.focus();
+}
+
+function openEditModal(id) {
+  const habit = habits.find(h => h.id === id);
+  if (!habit) return;
+  editingId = id;
+  originalColor = habit.color;
+  originalSize = habit.size;
+  modalTitle.textContent = '編輯習慣';
+  nameInput.value = habit.name;
+  baseDaysInput.value = habit.baseDays || 0;
+  nameError.classList.add('hide');
+  baseDaysError.classList.add('hide');
+  setSelectedColor(habit.color);
+  setSelectedSize(habit.size);
+  deleteBtn.classList.remove('hide');
+  overlay.classList.remove('hide');
+}
+
+function setSelectedColor(color) {
+  selectedColor = color;
+  colorPicker.querySelectorAll('.color-swatch').forEach(btn => {
+    btn.classList.toggle('is-selected', btn.dataset.color === color);
+  });
+  habitModal.dataset.color = color;
+
+  // 若是編輯既有習慣，即時把對應卡片的顏色也換過去，所見即所得
+  if (editingId !== null) {
+    const cardEl = document.getElementById(`card-${editingId}`);
+    if (cardEl) cardEl.dataset.color = color;
+  }
+}
+
+function setSelectedSize(size) {
+  selectedSize = size;
+  sizePicker.querySelectorAll('.size-swatch').forEach(btn => {
+    btn.classList.toggle('is-selected', btn.dataset.size === size);
+  });
+
+  const name = nameInput.value.trim();
+  const willOverflow = !!name && nameExceedsLimit(name, size);
+
+  // 若是編輯既有習慣，即時更新對應卡片的大小──
+  // 但如果切換後名稱會超出新尺寸的字數上限，先不要真的套用外觀變化，
+  // 避免卡片在尚未確認儲存前，短暫出現標題跟把手或編輯鈕重疊的畫面
+  if (editingId !== null) {
+    const cardEl = document.getElementById(`card-${editingId}`);
+    if (cardEl && !willOverflow) {
+      cardEl.classList.toggle('is-large', size === 'large');
+      cardEl.classList.toggle('is-small', size === 'small');
+    }
+  }
+
+  if (willOverflow) {
+    nameError.textContent = size === 'small'
+      ? '名稱太長了，小卡片裝不下，請縮短名稱或改選大卡片'
+      : '名稱太長了，請輸入更簡短的名稱';
+    nameError.classList.remove('hide');
+  } else {
+    nameError.classList.add('hide');
+  }
+}
+
+colorPicker.addEventListener('click', (e) => {
+  const btn = e.target.closest('.color-swatch');
+  if (!btn) return;
+  setSelectedColor(btn.dataset.color);
+});
+
+sizePicker.addEventListener('click', (e) => {
+  const btn = e.target.closest('.size-swatch');
+  if (!btn) return;
+  setSelectedSize(btn.dataset.size);
+});
+
+cancelBtn.addEventListener('click', () => {
+  // 取消時，若編輯過程中曾即時預覽過顏色或大小，要把卡片還原成原本的樣子
+  if (editingId !== null) {
+    const cardEl = document.getElementById(`card-${editingId}`);
+    if (cardEl) {
+      cardEl.dataset.color = originalColor;
+      cardEl.classList.toggle('is-large', originalSize === 'large');
+      cardEl.classList.toggle('is-small', originalSize === 'small');
+    }
+  }
+  overlay.classList.add('hide');
+});
+
+deleteBtn.addEventListener('click', () => {
+  if (editingId === null) return;
+  habits = habits.filter(h => h.id !== editingId);
+  saveHabits();
+  renderHabits();
+  overlay.classList.add('hide');
+});
+
+confirmBtn.addEventListener('click', () => {
+  const name = nameInput.value.trim();
+  const tooLong = !!name && nameExceedsLimit(name, selectedSize);
+  nameError.classList.toggle('hide', !tooLong);
+
+  const baseDaysRaw = baseDaysInput.value.trim();
+  let baseDays = baseDaysRaw === '' ? 0 : parseInt(baseDaysRaw, 10);
+  const baseDaysInvalid = isNaN(baseDays) || baseDays < 0;
+  const baseDaysTooLarge = !baseDaysInvalid && baseDays > MAX_TOTAL_DAYS;
+  baseDaysError.classList.toggle('hide', !(baseDaysInvalid || baseDaysTooLarge));
+  if (baseDaysInvalid) baseDaysError.textContent = '基礎天數不能是負數，請輸入0或更大的數字';
+  else if (baseDaysTooLarge) baseDaysError.textContent = '基礎天數過多，請輸入小一點的數字';
+
+  if (!name || tooLong || baseDaysInvalid || baseDaysTooLarge) return;
+
+  if (editingId !== null) {
+    const habit = habits.find(h => h.id === editingId);
+    if (habit) {
+      habit.name = name;
+      habit.color = selectedColor;
+      habit.size = selectedSize;
+      habit.baseDays = baseDays;
+    }
+  } else {
+    habits.push({ id: Date.now(), name, color: selectedColor, size: selectedSize, baseDays, dates: [] });
+  }
+  saveHabits();
+  renderHabits();
+  overlay.classList.add('hide');
+});
+
+// ---- 拖曳排序（FLIP動畫 + 重疊面積判斷，邏輯與Toki一致） ----
 let dragState = null;
 
 function attachDragHandlers(card, id) {
@@ -832,11 +831,8 @@ function attachDragHandlers(card, id) {
   });
 }
 
-function idFromCardEl(el) {
-  return Number(el.id.slice('card-'.length));
-}
+function idFromCardEl(el) { return Number(el.dataset.id); }
 
-// 依照 order（不含正在拖曳的卡片）取得對應 DOM 元素
 function elFromId(id) {
   if (dragState && id === dragState.id) return dragState.placeholder;
   return document.getElementById(`card-${id}`);
@@ -847,8 +843,6 @@ function sizeOfId(tid) {
   return (el && el.classList.contains('is-large')) ? 'large' : 'small';
 }
 
-// 在 order 陣列中找出 targetId 所屬的「整排」範圍（大卡自己一排；
-// 小卡跟旁邊相鄰的小卡兩個一排），回傳 [起始index, 結束index]
 function findRowBounds(order, targetId) {
   let i = 0;
   while (i < order.length) {
@@ -867,13 +861,11 @@ function findRowBounds(order, targetId) {
 
 function startDrag(card, id, startX, startY, pointerId) {
   const rect = card.getBoundingClientRect();
-  const addCardEl = eventsContainer.querySelector('.add-card');
+  const addCardEl = habitsContainer.querySelector('.add-card');
 
-  // 用一個外觀一致、但透明虛線的佔位框取代原本卡片在排版流中的位置，
-  // 讓拖曳中的卡片可以脫離排版流（position: fixed）自由跟著指標移動
   const placeholder = document.createElement('div');
   placeholder.className = `card card-placeholder ${card.classList.contains('is-small') ? 'is-small' : 'is-large'}`;
-  eventsContainer.insertBefore(placeholder, card);
+  habitsContainer.insertBefore(placeholder, card);
 
   card.classList.add('dragging');
   card.style.width = rect.width + 'px';
@@ -884,14 +876,10 @@ function startDrag(card, id, startX, startY, pointerId) {
   try { card.setPointerCapture(pointerId); } catch (e) {}
 
   dragState = {
-    id,
-    card,
-    placeholder,
-    addCardEl,
-    pointerId,
+    id, card, placeholder, addCardEl, pointerId,
     offsetX: startX - rect.left,
     offsetY: startY - rect.top,
-    liveOrder: events.map(ev => ev.id),
+    liveOrder: habits.map(h => h.id),
     pendingAnimations: 0
   };
 
@@ -901,14 +889,12 @@ function startDrag(card, id, startX, startY, pointerId) {
 }
 
 function reorderLiveDOM(order) {
-  // 依照 order 的順序，把佔位框與其他卡片依序插入到「新增卡片」之前
-  // 拖曳中的卡片本身是 position:fixed，不受影響，跳過即可
   order.forEach(id => {
     if (dragState && id === dragState.id) {
-      eventsContainer.insertBefore(dragState.placeholder, dragState.addCardEl);
+      habitsContainer.insertBefore(dragState.placeholder, dragState.addCardEl);
     } else {
       const el = document.getElementById(`card-${id}`);
-      if (el) eventsContainer.insertBefore(el, dragState.addCardEl);
+      if (el) habitsContainer.insertBefore(el, dragState.addCardEl);
     }
   });
 }
@@ -920,57 +906,36 @@ function onDragMove(e) {
   card.style.left = (e.clientX - offsetX) + 'px';
   card.style.top = (e.clientY - offsetY) + 'px';
 
-  // 上一輪讓位動畫還沒定下來時，先不要評估新的交換，避免拿「正在移動中」的位置去判斷，
-  // 導致追著動畫本身的位移誤觸發、跟自己的動畫打架而抖動
   if (dragState.pendingAnimations > 0) return;
 
-  const others = Array.from(eventsContainer.querySelectorAll('.card:not(.add-card):not(.card-placeholder):not(.dragging)'));
+  const others = Array.from(habitsContainer.querySelectorAll('.card:not(.add-card):not(.card-placeholder):not(.dragging)'));
   if (others.length === 0) return;
 
   const draggedRect = card.getBoundingClientRect();
   const draggedArea = draggedRect.width * draggedRect.height;
 
-  // 用「拖曳中卡片」跟每張其他卡片的實際重疊面積判斷懸停目標，
-  // 取代純粹比較指標座標距離——指標在卡片上的抓握點不固定，
-  // 用重疊面積才能讓兩個方向的觸發距離一致
-  let hoveredId = null;
-  let hoveredEl = null;
-  let maxArea = 0;
+  let hoveredId = null, hoveredEl = null, maxArea = 0;
   others.forEach(c => {
     const r = c.getBoundingClientRect();
     const overlapW = Math.min(draggedRect.right, r.right) - Math.max(draggedRect.left, r.left);
     const overlapH = Math.min(draggedRect.bottom, r.bottom) - Math.max(draggedRect.top, r.top);
     const area = (overlapW > 0 && overlapH > 0) ? overlapW * overlapH : 0;
     const threshold = Math.min(draggedArea, r.width * r.height) * 0.12;
-    if (area > threshold && area > maxArea) {
-      maxArea = area;
-      hoveredId = idFromCardEl(c);
-      hoveredEl = c;
-    }
+    if (area > threshold && area > maxArea) { maxArea = area; hoveredId = idFromCardEl(c); hoveredEl = c; }
   });
 
-  // 完全沒有重疊（例如拖到清單尾端空白處）時，退回用中心點距離找最近的卡片，避免卡死沒反應
   if (hoveredId === null) {
     let closestDist = Infinity;
     others.forEach(c => {
       const r = c.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
       const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
-      if (dist < closestDist) {
-        closestDist = dist;
-        hoveredId = idFromCardEl(c);
-        hoveredEl = c;
-      }
+      if (dist < closestDist) { closestDist = dist; hoveredId = idFromCardEl(c); hoveredEl = c; }
     });
   }
   if (hoveredId === null) return;
 
   const hoveredRect = hoveredEl.getBoundingClientRect();
-
-  // 任一邊是佔滿整排的大卡時，前後關係要看「排與排」之間的垂直位置，
-  // 否則大卡寬度會同時蓋住整排、若只看水平位置會誤判；
-  // 兩邊都是同排小卡時，才用左右的水平位置判斷
   let insertBefore;
   if (card.classList.contains('is-large') || hoveredEl.classList.contains('is-large')) {
     const dCy = draggedRect.top + draggedRect.height / 2;
@@ -986,8 +951,6 @@ function onDragMove(e) {
   const hoveredIndex = withoutDragged.indexOf(hoveredId);
   if (hoveredIndex === -1) return;
 
-  // 拖曳中是大卡、懸停目標是小卡時，插入點要對齊「整排」的頭或尾，
-  // 不能插在配對好的兩張小卡正中間，否則會拆散配對留下網格空格
   let insertAt = insertBefore ? hoveredIndex : hoveredIndex + 1;
   const draggedIsLarge = card.classList.contains('is-large');
   const hoveredIsSmall = !hoveredEl.classList.contains('is-large');
@@ -998,10 +961,8 @@ function onDragMove(e) {
 
   const newLiveOrder = withoutDragged.slice();
   newLiveOrder.splice(insertAt, 0, id);
-
   if (newLiveOrder.join(',') === dragState.liveOrder.join(',')) return;
 
-  // 重新排列前先記錄目前其他卡片（含佔位框）的畫面位置，重排後用 FLIP 讓它們平滑滑到新位置
   const trackedIds = dragState.liveOrder;
   const firstRects = new Map();
   trackedIds.forEach(tid => {
@@ -1013,13 +974,11 @@ function onDragMove(e) {
   reorderLiveDOM(newLiveOrder);
 
   newLiveOrder.forEach(tid => {
-    // tid 對應拖曳中卡片時，elFromId 會回傳佔位框──它才是真正佔據格子、需要平滑滑動的元素
     const el = elFromId(tid);
     const first = firstRects.get(tid);
     if (!el || !first) return;
     const last = el.getBoundingClientRect();
-    const dx = first.left - last.left;
-    const dy = first.top - last.top;
+    const dx = first.left - last.left, dy = first.top - last.top;
     if (dx || dy) {
       dragState.pendingAnimations++;
       let settled = false;
@@ -1048,9 +1007,8 @@ function onDragEnd() {
   document.removeEventListener('pointerup', onDragEnd);
   document.removeEventListener('pointercancel', onDragEnd);
 
-  // 把佔位框換回真正的卡片，再用 FLIP 讓卡片從目前浮動位置平滑滑入排版位置
   const floatingRect = card.getBoundingClientRect();
-  eventsContainer.insertBefore(card, placeholder);
+  habitsContainer.insertBefore(card, placeholder);
   placeholder.remove();
 
   card.classList.remove('dragging');
@@ -1060,8 +1018,7 @@ function onDragEnd() {
   card.style.top = '';
 
   const settledRect = card.getBoundingClientRect();
-  const dx = floatingRect.left - settledRect.left;
-  const dy = floatingRect.top - settledRect.top;
+  const dx = floatingRect.left - settledRect.left, dy = floatingRect.top - settledRect.top;
   card.style.transition = 'none';
   card.style.transform = `translate(${dx}px, ${dy}px) scale(1.03)`;
   requestAnimationFrame(() => {
@@ -1072,170 +1029,14 @@ function onDragEnd() {
     setTimeout(cleanup, 280);
   });
 
-  // 依照拖曳過程中即時計算出的最終順序，同步資料並存檔
-  const idToEvent = new Map(events.map(ev => [ev.id, ev]));
-  events = liveOrder.map(tid => idToEvent.get(tid)).filter(Boolean);
-  saveEvents();
+  const idToHabit = new Map(habits.map(h => [h.id, h]));
+  habits = liveOrder.map(tid => idToHabit.get(tid)).filter(Boolean);
+  saveHabits();
 
   dragState = null;
 }
 
-// ---- modal ----
-function openAddModal() {
-  editingId = null;
-  eventModalTitle.textContent = '新增事件';
-  eventNameInput.value = '';
-  eventNameInput.placeholder = getRandomPlaceholder();
-  eventDateInput.value = '';
-  eventTimeInput.value = '';
-  eventDeleteBtn.classList.add('hide');
-  eventDateError.classList.add('hide');
-  eventTimeError.classList.add('hide');
-  eventNameError.classList.add('hide');
-  originalColor = 'default';
-  setSelectedColor('default');
-  originalSize = 'large';
-  setSelectedSize('large');
-  eventOverlay.classList.remove('hide');
-}
-
-function openEditModal(id) {
-  const ev = events.find(e => e.id === id);
-  if (!ev) return;
-  editingId = id;
-  eventModalTitle.textContent = '編輯事件';
-  eventNameInput.value = ev.name;
-  eventDateInput.value = formatDateForInput(ev.target);
-  eventTimeInput.value = formatTimeForInput(ev.target);
-  eventDeleteBtn.classList.remove('hide');
-  eventDateError.classList.add('hide');
-  eventTimeError.classList.add('hide');
-  eventNameError.classList.add('hide');
-  originalColor = ev.color || 'default';
-  setSelectedColor(originalColor);
-  originalSize = ev.size || 'large';
-  setSelectedSize(originalSize);
-  eventOverlay.classList.remove('hide');
-}
-
-// ---- 卡片顏色選擇器 ----
-const colorPicker = document.getElementById('colorPicker');
-const modalEl = document.querySelector('.modal');
-
-function setSelectedColor(color) {
-  selectedColor = color;
-  colorPicker.querySelectorAll('.color-swatch').forEach(btn => {
-    btn.classList.toggle('is-selected', btn.dataset.color === color);
-  });
-  modalEl.dataset.color = color;
-
-  // 若是編輯既有事件，即時更新對應卡片的顏色
-  if (editingId !== null) {
-    const cardEl = document.getElementById(`card-${editingId}`);
-    if (cardEl) cardEl.dataset.color = color;
-  }
-}
-
-colorPicker.addEventListener('click', (e) => {
-  const btn = e.target.closest('.color-swatch');
-  if (!btn) return;
-  setSelectedColor(btn.dataset.color);
-});
-
-// ---- 卡片大小選擇器 ----
-const sizePicker = document.getElementById('sizePicker');
-
-function setSelectedSize(size) {
-  selectedSize = size;
-  sizePicker.querySelectorAll('.size-swatch').forEach(btn => {
-    btn.classList.toggle('is-selected', btn.dataset.size === size);
-  });
-
-  const name = eventNameInput.value.trim();
-  const willOverflow = !!name && nameExceedsLimit(name, size);
-
-  // 若是編輯既有事件，即時更新對應卡片的大小──
-  // 但如果切換後名稱會超出新尺寸的字數上限，先不要真的套用外觀變化，
-  // 避免卡片在尚未確認儲存前，短暫出現標題跟設定鍵重疊的畫面
-  if (editingId !== null) {
-    const cardEl = document.getElementById(`card-${editingId}`);
-    if (cardEl && !willOverflow) {
-      cardEl.classList.toggle('is-large', size === 'large');
-      cardEl.classList.toggle('is-small', size === 'small');
-    }
-  }
-
-  // 切換大小後，原本的名稱可能對新的卡片大小來說字數太多，要即時提示
-  if (willOverflow) {
-    eventNameError.textContent = size === 'small'
-      ? '事件名稱太長了，小卡片裝不下，請縮短名稱或改選大卡片'
-      : '事件名稱太長了，請輸入更簡短的名稱';
-    eventNameError.classList.remove('hide');
-  } else {
-    eventNameError.classList.add('hide');
-  }
-}
-
-sizePicker.addEventListener('click', (e) => {
-  const btn = e.target.closest('.size-swatch');
-  if (!btn) return;
-  setSelectedSize(btn.dataset.size);
-});
-
-eventCancelBtn.addEventListener('click', () => {
-  if (editingId !== null) {
-    const cardEl = document.getElementById(`card-${editingId}`);
-    if (cardEl) {
-      cardEl.dataset.color = originalColor;
-      cardEl.classList.toggle('is-large', originalSize === 'large');
-      cardEl.classList.toggle('is-small', originalSize === 'small');
-    }
-  }
-  eventOverlay.classList.add('hide');
-});
-
-eventDeleteBtn.addEventListener('click', () => {
-  if (editingId === null) return;
-  events = events.filter(e => e.id !== editingId);
-  saveEvents();
-  renderEvents();
-  eventOverlay.classList.add('hide');
-});
-
-eventConfirmBtn.addEventListener('click', () => {
-  const name = eventNameInput.value.trim();
-  const dateOk = parseDateInput(eventDateInput.value) !== null;
-  const timeOk = parseTimeInput(eventTimeInput.value) !== null;
-  const nameTooLong = !!name && nameExceedsLimit(name, selectedSize);
-
-  eventDateError.classList.toggle('hide', dateOk);
-  eventTimeError.classList.toggle('hide', timeOk);
-  if (nameTooLong) {
-    eventNameError.textContent = selectedSize === 'small'
-      ? '事件名稱太長了，小卡片裝不下，請縮短名稱或改選大卡片'
-      : '事件名稱太長了，請輸入更簡短的名稱';
-  }
-  eventNameError.classList.toggle('hide', !nameTooLong);
-
-  if (!name || !dateOk || !timeOk || nameTooLong) return;
-
-  const target = buildDate(eventDateInput.value, eventTimeInput.value);
-  if (!target) return;
-
-  if (editingId !== null) {
-    const ev = events.find(e => e.id === editingId);
-    if (ev) { ev.name = name; ev.target = target; ev.color = selectedColor; ev.size = selectedSize; }
-  } else {
-    events.push({ id: Date.now(), name, target, color: selectedColor, size: selectedSize });
-  }
-  saveEvents();
-  renderEvents();
-  eventOverlay.classList.add('hide');
-});
-
-// 載入已記憶的事件
-events = loadEvents();
-renderEvents();
+renderHabits();
 
 // ---- 深淺色模式 ----
 const root = document.documentElement;
@@ -1246,16 +1047,11 @@ function getEffectiveTheme() {
   if (explicit) return explicit;
   return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
-
-function updateToggleUI() {
-  themeToggle.classList.toggle('is-light', getEffectiveTheme() === 'light');
-}
+function updateToggleUI() { themeToggle.classList.toggle('is-light', getEffectiveTheme() === 'light'); }
 
 try {
   const savedTheme = localStorage.getItem(THEME_KEY);
-  if (savedTheme === 'light' || savedTheme === 'dark') {
-    root.setAttribute('data-theme', savedTheme);
-  }
+  if (savedTheme === 'light' || savedTheme === 'dark') root.setAttribute('data-theme', savedTheme);
 } catch (e) {}
 
 themeToggle.addEventListener('click', () => {
@@ -1270,112 +1066,6 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()
 });
 
 updateToggleUI();
-
-// ---- 倒數計算 ----
-function computeParts(diffMs, targetDate) {
-  const ms = Math.max(diffMs, 0);
-  const msPerDay = 86400000;
-
-  const totalDays = Math.floor(ms / msPerDay);
-  let rest = ms - totalDays * msPerDay;
-  const hours = Math.floor(rest / 3600000);
-  rest -= hours * 3600000;
-  const minutes = Math.floor(rest / 60000);
-  rest -= minutes * 60000;
-  const seconds = Math.floor(rest / 1000);
-  const millis = Math.floor(rest % 1000);
-
-  // 用實際日曆年計算「年」與「剩餘天數」，避免 365.25 天零頭
-  let years = 0;
-  let days = totalDays;
-  if (targetDate) {
-    const now = new Date(Date.now());
-    years = targetDate.getFullYear() - now.getFullYear();
-    const anchor = new Date(now);
-    anchor.setFullYear(anchor.getFullYear() + years);
-    if (anchor.getTime() > targetDate.getTime()) {
-      years -= 1;
-      anchor.setFullYear(anchor.getFullYear() - 1);
-    }
-    if (years > 0) {
-      days = Math.floor((targetDate.getTime() - anchor.getTime()) / msPerDay);
-    }
-  }
-
-  return { years, days, hours, minutes, seconds, millis };
-}
-
-// ---- countdown loop ----
-function applyBigTimeLayout(ev, years, days, hours) {
-  const card = document.getElementById(`card-${ev.id}`);
-  const bigTime = document.getElementById(`bigTime-${ev.id}`);
-  const yearGroup = document.getElementById(`yearGroup-${ev.id}`);
-  const dayGroup = document.getElementById(`dayGroup-${ev.id}`);
-  const smallTime = document.getElementById(`smallTime-${ev.id}`);
-  const hourGroup = document.getElementById(`hourGroup-${ev.id}`);
-  if (!card || !bigTime || !yearGroup || !dayGroup || !smallTime || !hourGroup) return;
-
-  const showYear = years > 0;
-  const showDay = years > 0 || days > 0;
-  const isSmallCard = card.classList.contains('is-small');
-
-  if (isSmallCard) {
-    // 小卡片：年/天與時分秒二選一顯示，不同時佔用兩行空間
-    const bigEmpty = !showYear && !showDay;
-    const showHourSmall = bigEmpty && hours > 0;
-    yearGroup.classList.toggle('hide', !showYear);
-    dayGroup.classList.toggle('hide', !showDay);
-    hourGroup.classList.toggle('hide', !showHourSmall);
-    bigTime.classList.toggle('empty', bigEmpty);
-    smallTime.classList.toggle('hide', !bigEmpty);
-    smallTime.classList.toggle('is-main', bigEmpty);
-    smallTime.classList.toggle('show-ms', bigEmpty && !showHourSmall);
-    return;
-  }
-
-  const showHour = showDay || hours > 0;
-
-  yearGroup.classList.toggle('hide', !showYear);
-  dayGroup.classList.toggle('hide', !showDay);
-  hourGroup.classList.toggle('hide', !showHour);
-
-  const bigEmpty = !showYear && !showDay;
-  bigTime.classList.toggle('empty', bigEmpty);
-  smallTime.classList.toggle('is-main', bigEmpty);
-}
-
-function tick() {
-  const now = Date.now();
-  events.forEach(ev => {
-    const diff = ev.target.getTime() - now;
-    const yearsEl = document.getElementById(`years-${ev.id}`);
-    if (!yearsEl) return;
-
-    if (diff <= 0) {
-      yearsEl.textContent = 0;
-      document.getElementById(`days-${ev.id}`).textContent = 0;
-      document.getElementById(`hours-${ev.id}`).textContent = '00';
-      document.getElementById(`minutes-${ev.id}`).textContent = '00';
-      document.getElementById(`seconds-${ev.id}`).textContent = '00';
-      document.getElementById(`ms-${ev.id}`).textContent = '000';
-      document.getElementById(`status-${ev.id}`).textContent = '完成';
-      applyBigTimeLayout(ev, 0, 0, 0);
-      return;
-    }
-
-    const p = computeParts(diff, ev.target);
-    yearsEl.textContent = p.years;
-    document.getElementById(`days-${ev.id}`).textContent = p.days;
-    document.getElementById(`hours-${ev.id}`).textContent = String(p.hours).padStart(2, '0');
-    document.getElementById(`minutes-${ev.id}`).textContent = String(p.minutes).padStart(2, '0');
-    document.getElementById(`seconds-${ev.id}`).textContent = String(p.seconds).padStart(2, '0');
-    document.getElementById(`ms-${ev.id}`).textContent = String(p.millis).padStart(3, '0');
-    document.getElementById(`status-${ev.id}`).textContent = '倒數中';
-    applyBigTimeLayout(ev, p.years, p.days, p.hours);
-  });
-  requestAnimationFrame(tick);
-}
-tick();
 </script>
 
 </body>
